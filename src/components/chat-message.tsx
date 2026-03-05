@@ -1,4 +1,7 @@
-import { User, Bot } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { User, Bot, Copy, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -13,6 +16,7 @@ export interface Message {
 
 interface ChatMessageProps {
   message: Message;
+  isStreaming?: boolean;
 }
 
 function CodeBlock({ className, children }: { className?: string; children?: React.ReactNode }) {
@@ -46,13 +50,20 @@ function CodeBlock({ className, children }: { className?: string; children?: Rea
   );
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
+export function ChatMessage({ message, isStreaming }: ChatMessageProps) {
   const isUser = message.role === "user";
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(message.content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className={isUser ? "flex justify-end" : "flex justify-start"}>
       <div className={`flex gap-3 max-w-[85%] ${isUser ? "flex-row-reverse" : ""}`}>
-        <div className={`w-8 h-8 flex items-center justify-center shrink-0 ${isUser ? "" : ""}`}>
+        <div className="w-8 h-8 flex items-center justify-center shrink-0">
           {isUser ? (
             <User className="w-5 h-5 text-muted-foreground" />
           ) : (
@@ -61,7 +72,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         </div>
         <div className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
           <div
-            className={`px-4 py-3 ${
+            className={`group relative px-4 py-3 ${
               isUser
                 ? "bg-primary text-primary-foreground"
                 : "bg-background border border-border"
@@ -149,10 +160,31 @@ export function ChatMessage({ message }: ChatMessageProps) {
                 </ReactMarkdown>
               </div>
             )}
+            {!isUser && (
+              <button
+                onClick={handleCopy}
+                className={`absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded hover:bg-muted ${isStreaming ? 'pointer-events-none' : ''}`}
+                title="复制"
+              >
+                {copied ? (
+                  <Check className="w-3.5 h-3.5 text-muted-foreground" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5 text-muted-foreground" />
+                )}
+              </button>
+            )}
           </div>
-          <span className="text-xs text-muted-foreground mt-1.5 px-1">
-            {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-          </span>
+          <div className="flex items-center gap-2 mt-1.5 px-1">
+            <span className="text-xs text-muted-foreground">
+              {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </span>
+            {!isUser && copied && (
+              <span className="text-xs text-muted-foreground">已复制</span>
+            )}
+            {!isUser && isStreaming && (
+              <span className="text-xs text-muted-foreground">正在输入...</span>
+            )}
+          </div>
         </div>
       </div>
     </div>

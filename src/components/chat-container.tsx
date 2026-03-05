@@ -1,25 +1,37 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { ChatMessage, type Message } from "./chat-message";
 import { SettingsPanel, SettingsButton } from "./settings-panel";
 import { useTheme } from "./theme-provider";
-import { Send, Bot, Plus } from "lucide-react";
+import { Bot, Plus, ArrowUp } from "lucide-react";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupTextarea,
 } from "@/components/ui/input-group";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+type ChatMode = "auto" | "agent" | "manual";
+
+interface StreamingMessage extends Message {
+  isComplete: boolean;
+}
 
 export function ChatContainer() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<StreamingMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [mode, setMode] = useState<ChatMode>("auto");
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { isDark } = useTheme();
@@ -40,15 +52,24 @@ export function ChatContainer() {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
-    const userMessage: Message = {
+    const userMessage: StreamingMessage = {
       id: Date.now().toString(),
       role: "user",
       content: input,
       timestamp: new Date(),
+      isComplete: true,
     };
 
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
+    const aiMessageId = (Date.now() + 1).toString();
+    const aiMessage: StreamingMessage = {
+      id: aiMessageId,
+      role: "assistant",
+      content: "",
+      timestamp: new Date(),
+      isComplete: false,
+    };
+
+    setMessages((prev) => [...prev, userMessage, aiMessage]);
     setInput("");
     setIsLoading(true);
 
@@ -76,17 +97,6 @@ export function ChatContainer() {
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
-      let aiMessageContent = "";
-      const aiMessageId = (Date.now() + 1).toString();
-
-      const aiMessage: Message = {
-        id: aiMessageId,
-        role: "assistant",
-        content: "",
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, aiMessage]);
 
       if (reader) {
         while (true) {
@@ -104,11 +114,10 @@ export function ChatContainer() {
               try {
                 const parsed = JSON.parse(data);
                 if (parsed.content) {
-                  aiMessageContent += parsed.content;
                   setMessages((prev) =>
                     prev.map((m) =>
                       m.id === aiMessageId
-                        ? { ...m, content: aiMessageContent }
+                        ? { ...m, content: m.content + parsed.content }
                         : m
                     )
                   );
@@ -119,14 +128,21 @@ export function ChatContainer() {
             }
           }
         }
+
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === aiMessageId ? { ...m, isComplete: true } : m
+          )
+        );
       }
     } catch (error) {
       console.error("Error sending message:", error);
-      const errorMessage: Message = {
+      const errorMessage: StreamingMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: "抱歉，发生了错误，请稍后重试。",
         timestamp: new Date(),
+        isComplete: true,
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -145,6 +161,17 @@ export function ChatContainer() {
     setMessages([]);
     setSettingsOpen(false);
   };
+
+  const getModeLabel = (m: ChatMode) => {
+    switch (m) {
+      case "auto": return "Auto";
+      case "agent": return "Agent";
+      case "manual": return "Manual";
+    }
+  };
+
+  const lastMessage = messages[messages.length - 1];
+  const isTyping = isLoading || (lastMessage?.role === "assistant" && !lastMessage?.isComplete);
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -179,15 +206,19 @@ export function ChatContainer() {
                     欢迎使用 AI 助手
                   </h2>
                   <p className="text-sm text-muted-foreground max-w-xs">
-                    我可以帮你回答问题、写代码、分析数据等。请在下方输入你的问题开始对话。
+                    我可以帮你回答问题，写代码，分析数据等。请在下方输入你的问题开始对话。
                   </p>
                 </div>
               ) : (
                 <div className="space-y-6">
                   {messages.map((message) => (
-                    <ChatMessage key={message.id} message={message} />
+                    <ChatMessage 
+                      key={message.id} 
+                      message={message}
+                      isStreaming={!message.isComplete && message.role === "assistant"}
+                    />
                   ))}
-                  {isLoading && (
+                  {isTyping && (
                     <div className="flex justify-start">
                       <div className="flex items-start gap-3 max-w-[85%]">
                         <div className="w-8 h-8 flex items-center justify-center shrink-0">
@@ -211,11 +242,6 @@ export function ChatContainer() {
         <CardFooter className="p-4 border-t">
           <div className="w-full">
             <InputGroup className="border-input">
-              <InputGroupAddon align="inline-start">
-                <InputGroupButton variant="ghost" size="icon-sm" disabled={isLoading}>
-                  <Plus className="w-4 h-4" />
-                </InputGroupButton>
-              </InputGroupAddon>
               <InputGroupTextarea
                 ref={textareaRef}
                 value={input}
@@ -226,14 +252,41 @@ export function ChatContainer() {
                 rows={1}
                 className="min-h-[44px] max-h-[200px] resize-none"
               />
-              <InputGroupAddon align="inline-end">
+              <InputGroupAddon align="block-end">
                 <InputGroupButton 
                   variant="ghost" 
-                  size="icon-sm" 
+                  size="icon-xs" 
+                  disabled={isLoading}
+                  className="h-7 w-7 rounded-full"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </InputGroupButton>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <InputGroupButton variant="ghost" className="text-xs h-7 px-2 font-normal rounded-full">
+                      {getModeLabel(mode)}
+                    </InputGroupButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="top" align="start" className="min-w-[80px]">
+                    <DropdownMenuItem onClick={() => setMode("auto")}>
+                      Auto
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setMode("agent")}>
+                      Agent
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setMode("manual")}>
+                      Manual
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <InputGroupButton 
+                  variant="default" 
+                  size="icon-xs"
                   onClick={handleSend}
                   disabled={isLoading || !input.trim()}
+                  className="h-8 w-8 rounded-full"
                 >
-                  <Send className="w-4 h-4" />
+                  <ArrowUp className="w-4 h-4" />
                 </InputGroupButton>
               </InputGroupAddon>
             </InputGroup>
