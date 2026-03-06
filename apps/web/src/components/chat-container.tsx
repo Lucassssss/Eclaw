@@ -252,7 +252,8 @@ export function ChatContainer() {
                 rows={1}
                 className="min-h-[44px] max-h-[200px] resize-none"
               />
-              <InputGroupAddon align="block-end">
+              <InputGroupAddon align="block-end" className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
                 <InputGroupButton 
                   variant="ghost" 
                   size="icon-xs" 
@@ -279,6 +280,7 @@ export function ChatContainer() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+                </div>
                 <InputGroupButton 
                   variant="default" 
                   size="icon-xs"
