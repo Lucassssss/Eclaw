@@ -1,25 +1,23 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Settings, X, Moon, Sun, Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
+import { useTheme } from "./theme-provider";
 
 interface SettingsPanelProps {
   isOpen: boolean;
   onClose: () => void;
-  isDark: boolean;
-  onToggleTheme: () => void;
   onClearChat: () => void;
 }
 
 export function SettingsPanel({
   isOpen,
   onClose,
-  isDark,
-  onToggleTheme,
   onClearChat,
 }: SettingsPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -53,6 +51,12 @@ export function SettingsPanel({
     };
   }, [isOpen, onClose]);
 
+  const isDark = theme === "dark";
+
+  const handleToggleTheme = () => {
+    setTheme(isDark ? "light" : "dark");
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -79,15 +83,15 @@ export function SettingsPanel({
 
         <div className="p-2">
           <button
-            onClick={onToggleTheme}
+            onClick={handleToggleTheme}
             className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-accent rounded-sm transition-colors"
           >
             {isDark ? (
-              <Moon className="w-4 h-4" />
-            ) : (
               <Sun className="w-4 h-4" />
+            ) : (
+              <Moon className="w-4 h-4" />
             )}
-            <span>{isDark ? "深色模式" : "浅色模式"}</span>
+            <span>{isDark ? "浅色模式" : "深色模式"}</span>
           </button>
 
           <button

@@ -34,7 +34,6 @@ export function ChatContainer() {
   const [mode, setMode] = useState<ChatMode>("auto");
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { isDark } = useTheme();
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -299,8 +298,6 @@ export function ChatContainer() {
       <SettingsPanel
         isOpen={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        isDark={isDark}
-        onToggleTheme={() => {}}
         onClearChat={handleClearChat}
       />
     </div>
