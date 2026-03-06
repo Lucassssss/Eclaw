@@ -84,7 +84,6 @@ const tools = [calculatorTool, searchTool, getCurrentTimeTool];
 const agent = createAgent({
   model: llm,
   tools,
-  system: "你是一个智能助手，可以用工具来帮助用户解决问题。当你需要执行计算、搜索信息或获取时间时，使用相应的工具。",
 });
 
 interface ConversationHistory {
