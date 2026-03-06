@@ -12,6 +12,13 @@ export interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  toolCalls?: Array<{
+    id: string;
+    name: string;
+    input: string;
+    output?: string;
+    status: "running" | "completed" | "error";
+  }>;
 }
 
 interface ChatMessageProps {
@@ -158,6 +165,44 @@ export function ChatMessage({ message, isStreaming }: ChatMessageProps) {
                 >
                   {message.content}
                 </ReactMarkdown>
+              </div>
+            )}
+            {message.toolCalls && message.toolCalls.length > 0 && (
+              <div className="mt-3 space-y-2">
+                <div className="text-xs text-muted-foreground font-medium">调用工具:</div>
+                {message.toolCalls.map((tool) => (
+                  <div
+                    key={tool.id}
+                    className={`text-xs rounded p-2 ${
+                      tool.status === "running"
+                        ? "bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800"
+                        : tool.status === "error"
+                        ? "bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800"
+                        : "bg-muted border border-border"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-medium">{tool.name}</span>
+                      {tool.status === "running" && (
+                        <span className="text-blue-600 dark:text-blue-400">运行中...</span>
+                      )}
+                      {tool.status === "completed" && (
+                        <span className="text-green-600 dark:text-green-400">✓</span>
+                      )}
+                      {tool.status === "error" && (
+                        <span className="text-red-600 dark:text-red-400">✗</span>
+                      )}
+                    </div>
+                    <div className="mt-1 font-mono text-muted-foreground">
+                      输入: {tool.input}
+                    </div>
+                    {tool.output && (
+                      <div className="mt-1 font-mono">
+                        输出: {tool.output}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
             {!isUser && (

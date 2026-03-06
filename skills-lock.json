@@ -36,6 +36,11 @@
       "sourceType": "github",
       "computedHash": "0cdd844e5af5d2c47e3faf31ba9b9f1b86a611edecc72e2021688c0b6cce6938"
     },
+    "langgraph-docs": {
+      "source": "langchain-ai/deepagentsjs",
+      "sourceType": "github",
+      "computedHash": "ab9d7e7f7b81751e6985ba7697f01dac12873523a27d7d2f53d4b91a75fd8a45"
+    },
     "monorepo-management": {
       "source": "wshobson/agents",
       "sourceType": "github",

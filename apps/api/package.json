@@ -11,8 +11,10 @@
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
+    "langchain": "^0.3.21",
     "@langchain/core": "^1.1.30",
     "@langchain/openai": "^1.2.12",
+    "zod": "^3.24.0",
     "cors": "^2.8.5",
     "express": "^4.21.0"
   },

@@ -22,8 +22,20 @@ import {
 
 type ChatMode = "auto" | "agent" | "manual";
 
+const SESSION_ID = "default";
+
+export interface ToolCall {
+  id: string;
+  name: string;
+  input: string;
+  output?: string;
+  status: "running" | "completed" | "error";
+}
+
 interface StreamingMessage extends Message {
   isComplete: boolean;
+  toolCalls?: ToolCall[];
+  mode?: ChatMode;
 }
 
 export function ChatContainer() {
@@ -66,6 +78,8 @@ export function ChatContainer() {
       content: "",
       timestamp: new Date(),
       isComplete: false,
+      toolCalls: mode === "agent" ? [] : undefined,
+      mode,
     };
 
     setMessages((prev) => [...prev, userMessage, aiMessage]);
@@ -87,6 +101,8 @@ export function ChatContainer() {
             role: "user",
             content: input
           }],
+          mode,
+          sessionId: SESSION_ID,
         }),
       });
 
@@ -96,6 +112,7 @@ export function ChatContainer() {
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
+      let currentToolCallId = 0;
 
       if (reader) {
         while (true) {
@@ -112,14 +129,62 @@ export function ChatContainer() {
 
               try {
                 const parsed = JSON.parse(data);
-                if (parsed.content) {
-                  setMessages((prev) =>
-                    prev.map((m) =>
-                      m.id === aiMessageId
-                        ? { ...m, content: m.content + parsed.content }
-                        : m
-                    )
-                  );
+
+                if (mode === "agent") {
+                  if (parsed.type === "tool_call") {
+                    const toolId = `tool-${currentToolCallId++}`;
+                    setMessages((prev) =>
+                      prev.map((m) =>
+                        m.id === aiMessageId
+                          ? {
+                              ...m,
+                              toolCalls: [
+                                ...(m.toolCalls || []),
+                                {
+                                  id: toolId,
+                                  name: parsed.name,
+                                  input: parsed.input,
+                                  status: "running",
+                                },
+                              ],
+                            }
+                          : m
+                      )
+                    );
+                  } else if (parsed.type === "tool_result") {
+                    setMessages((prev) =>
+                      prev.map((m) =>
+                        m.id === aiMessageId
+                          ? {
+                              ...m,
+                              toolCalls: (m.toolCalls || []).map((tc, idx) =>
+                                idx === (m.toolCalls?.length || 1) - 1
+                                  ? { ...tc, output: parsed.output, status: "completed" }
+                                  : tc
+                              ),
+                            }
+                          : m
+                      )
+                    );
+                  } else if (parsed.content) {
+                    setMessages((prev) =>
+                      prev.map((m) =>
+                        m.id === aiMessageId
+                          ? { ...m, content: m.content + parsed.content }
+                          : m
+                      )
+                    );
+                  }
+                } else {
+                  if (parsed.content) {
+                    setMessages((prev) =>
+                      prev.map((m) =>
+                        m.id === aiMessageId
+                          ? { ...m, content: m.content + parsed.content }
+                          : m
+                      )
+                    );
+                  }
                 }
               } catch (e) {
                 console.error("Error parsing chunk:", e);
