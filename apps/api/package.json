@@ -1,0 +1,24 @@
+{
+  "name": "api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir dist",
+    "start": "bun run dist/index.js",
+    "lint": "echo \"Linting...\"",
+    "clean": "rm -rf dist node_modules"
+  },
+  "dependencies": {
+    "@langchain/core": "^1.1.30",
+    "@langchain/openai": "^1.2.12",
+    "cors": "^2.8.5",
+    "express": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "typescript": "^5.9.3"
+  }
+}
