@@ -1,61 +1,37 @@
-import { ChatDeepSeek } from "@langchain/deepseek";
+import { deepseek, DeepSeekLanguageModelOptions } from '@ai-sdk/deepseek';
+import { ModelMessage, stepCountIs, streamText, ToolSet } from 'ai';
+import { tools } from '../tools/index.js';
 
-const model = new ChatDeepSeek({
-  model: "deepseek-reasoner",
-  temperature: 0,
-  streaming: true  // 启用流式
-});
+// const toolMap = Object.fromEntries(tools.map((t: any) => [t.name, t]));
 
-export default model;
-// const stream = await model.stream("证明勾股定理的简单方法");
-// for await (const chunk of stream) {
-//   // chunk.content 包含思考过程和最终答案
-//   if (chunk.content) {
-//     console.log(chunk.content);
-//   }
+export const runChat = async (
+  messages: ModelMessage[],
+  modelName: string = "reasoner",
+  res,
+) => {
+  const isReasoner = modelName === "reasoner";
   
-//   // 检查 reasoning blocks
-//   if (chunk.contentBlocks) {
-//     const reasoning = chunk.contentBlocks.find(block => block.type === "reasoning");
-//     if (reasoning) {
-//       console.log("思考:", reasoning.reasoning);
-//     }
-//   }
-// }
+  const result = streamText({
+    model: deepseek(isReasoner ? 'deepseek-reasoner' : 'deepseek-chat'),
+    messages: messages,
+    ...(isReasoner ? {
+      providerOptions: {
+        deepseek: {
+          thinking: { type: 'enabled' },
+        } satisfies DeepSeekLanguageModelOptions,
+      },
+    } : {}),
+    tools: tools,
+    stopWhen: stepCountIs(100),
+  });
 
-
-// import OpenAI from "openai";
-// import type { ModelConfig, ModelInfo } from "../types/index.js";
-
-// const deepseekKey = process.env.DEEPSEEK_API_KEY;
-// const deepseekBaseUrl = process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com";
-
-// export const openai = new OpenAI({
-//   apiKey: deepseekKey,
-//   baseURL: deepseekBaseUrl,
-// });
-
-// export function createLLMConfig(modelId: string): ModelConfig {
-//   return {
-//     model: modelId === "reasoner" ? "deepseek-reasoner" : "deepseek-chat",
-//     temperature: modelId === "reasoner" ? 0 : 0.7,
-//   };
-// }
-
-// export function getAvailableModels(): ModelInfo[] {
-//   return [
-//     { id: "chat", name: "DeepSeek Chat", description: "通用对话模型" },
-//     { id: "reasoner", name: "DeepSeek Reasoner", description: "深度思考模式" },
-//   ];
-// }
-
-// export function isLLMConfigured(): boolean {
-//   return !!deepseekKey;
-// }
-
-// export function getLLMErrorMessage(): string {
-//   if (!deepseekKey) {
-//     return "DEEPSEEK_API_KEY is not set";
-//   }
-//   return "LLM configuration error";
-// }
+  for await (const part of result.fullStream) {
+    if (part.type === 'reasoning-delta') {
+      res.write(`data: ${JSON.stringify({ type: "reasoning", content: part.text })}\n\n`);
+    } else if (part.type === 'text-delta') {
+      res.write(`data: ${JSON.stringify({ type: "text", content: part.text })}\n\n`);
+    } else if (part.type === 'tool-result') {
+      res.write(`data: ${JSON.stringify({ type: "tool-result", content: JSON.stringify(part) })}\n\n`);
+    }
+  }
+}

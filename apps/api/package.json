@@ -8,12 +8,16 @@
     "start": "bun run src/index.ts"
   },
   "dependencies": {
+    "@ai-sdk/deepseek": "^2.0.24",
+    "@browserbasehq/stagehand": "^3.1.0",
     "@langchain/core": "^1.1.31",
     "@langchain/deepseek": "^1.0.16",
     "@langchain/langgraph": "^1.2.1",
     "@langchain/openai": "^1.2.12",
+    "ai": "^6.0.116",
     "cors": "^2.8.5",
     "deepagents": "^1.8.1",
+    "dotenv": "^17.3.1",
     "express": "^4.21.0",
     "langchain": "^1.2.30",
     "openai": "^6.27.0",
