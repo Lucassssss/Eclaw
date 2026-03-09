@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "bun",
+      "request": "launch",
+      "name": "Debug Bun Server",
+      "program": "../src/index.ts",
+      "runtime": "bun",
+      "console": "internalConsole"
+    },
+    {
+      "type": "bun",
+      "request": "attach",
+      "name": "Attach to Bun Process",
+      "url": "ws://localhost:9229"
+    }
+  ]
+}

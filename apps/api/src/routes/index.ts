@@ -44,21 +44,42 @@ router.post("/history/clear", (req, res) => {
 
 router.post("/api/chat", async (req, res) => {
   try {
-    // if (!isLLMConfigured()) {
-    //   return res.status(500).json({ error: getLLMErrorMessage() });
-    // }
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
 
-    const stream = await model.stream("证明勾股定理的简单方法");
+    const { messages, mode = "auto", model: modelName = "chat", sessionId = getDefaultSessionId() } = req.body;
+    console.log("Received messages:", messages?.length, "mode:", mode, "model:", modelName);
+
+    if (!messages || !Array.isArray(messages)) {
+      return res.status(400).json({ error: "messages array is required" });
+    }
+
+    const savedHistory = getHistory(sessionId);
+    const langchainMessages = savedHistory.map((msg) =>
+      msg.role === "user" ? new HumanMessage(msg.content) : new AIMessage(msg.content)
+    );
+
+    for (const msg of messages) {
+      if (msg.role === "user") {
+        langchainMessages.push(new HumanMessage(msg.content));
+      } else if (msg.role === "assistant") {
+        langchainMessages.push(new AIMessage(msg.content));
+      }
+    }
+
+    const lastUserMessage = messages.filter(m => m.role === "user").pop()?.content || "";
+    let assistantResponse = "";
+
+    const stream = await model.stream(langchainMessages);
+    console.log("Stream started for:", lastUserMessage);
+
     for await (const chunk of stream) {
-      // chunk.content 包含思考过程和最终答案
       if (chunk.content) {
+        assistantResponse += chunk.content;
         res.write(`data: ${JSON.stringify({ type: "content", content: chunk.content })}\n\n`);
       }
       
-      // 检查 reasoning blocks
       if (chunk.contentBlocks) {
         const reasoning = chunk.contentBlocks.find(block => block.type === "reasoning");
         if (reasoning) {
@@ -66,10 +87,16 @@ router.post("/api/chat", async (req, res) => {
         }
       }
     }
+
+    addToHistory(sessionId, "user", lastUserMessage);
+    addToHistory(sessionId, "assistant", assistantResponse);
+    
     res.write("data: [DONE]\n\n");
   } catch (error) {
     console.error("Chat error:", error);
     return res.status(500).json({ error: "Internal server error" });
+  } finally {
+    if (!res.destroyed) res.end();
   }
 });
 // router.post("/api/chat", async (req, res) => {

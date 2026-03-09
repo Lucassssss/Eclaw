@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "bun run --watch src/index.ts",
+    "dev": "kill-port 3001 && bun --watch src/index.ts",
+    "debug": "bun --inspect-wait src/index.ts",
     "start": "bun run src/index.ts"
   },
   "dependencies": {
