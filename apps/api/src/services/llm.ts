@@ -1,8 +1,27 @@
 import { deepseek, DeepSeekLanguageModelOptions } from '@ai-sdk/deepseek';
+import { createMinimax } from 'vercel-minimax-ai-provider';
 import { ModelMessage, stepCountIs, streamText, ToolSet } from 'ai';
 import { tools } from '../tools/index.js';
+import "dotenv/config";
 
 // const toolMap = Object.fromEntries(tools.map((t: any) => [t.name, t]));
+
+const modelSelector = (modelName: string) => {
+  const provider = modelName.split('/')[0];
+  const model = modelName.split('/')[1];
+  switch(provider) {
+    case 'deepseek':
+      return deepseek(model);
+    case 'minimax':
+      const minimax = createMinimax({
+        apiKey: process.env.MINIMAX_API_KEY,
+        baseURL: process.env.MINIMAX_API_BASE_URL,
+      })
+      return minimax(model);
+    default:
+      return deepseek('deepseek-chat');
+  }
+}
 
 export const runChat = async (
   messages: ModelMessage[],
@@ -12,7 +31,8 @@ export const runChat = async (
   const isReasoner = modelName === "reasoner";
   
   const result = streamText({
-    model: deepseek(isReasoner ? 'deepseek-reasoner' : 'deepseek-chat'),
+    // model: deepseek(isReasoner ? 'deepseek-reasoner' : 'deepseek-chat'),
+    model: modelSelector(modelName),
     messages: messages,
     ...(isReasoner ? {
       providerOptions: {

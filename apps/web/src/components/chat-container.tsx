@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 type ChatMode = "auto" | "agent" | "manual" | "deep-agent";
-type ModelType = "chat" | "reasoner";
 
 const SESSION_ID = "default";
 
@@ -50,7 +49,7 @@ export function ChatContainer() {
   const [isLoading, setIsLoading] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [mode, setMode] = useState<ChatMode>("agent");
-  const [model, setModel] = useState<ModelType>("reasoner");
+  const [model, setModel] = useState<string>("deepseek/deepseek-chat");
   const [subagents, setSubagents] = useState<Subagent[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -699,12 +698,13 @@ export function ChatContainer() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <InputGroupButton variant="ghost" className="text-xs h-7 px-2 font-normal rounded-full bg-muted">
-                          {model === "reasoner" ? "🤔 深度思考" : "⚡ 快速"}
+                          {model.split('/')[1] || model}
                         </InputGroupButton>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent side="top" align="start" className="min-w-[120px]">
-                        <DropdownMenuItem onClick={() => setModel("chat")}>⚡ 快速回答</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setModel("reasoner")}>🤔 深度思考</DropdownMenuItem>
+                      <DropdownMenuContent side="top" align="start" className="min-w-[160px]">
+                        <DropdownMenuItem onClick={() => setModel("deepseek/deepseek-chat")}>deepseek-chat</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setModel("deepseek/deepseek-reasoner")}>deepseek-reasoner</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setModel("minimax/MiniMax-M2.5")}>MiniMax-M2.5</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
