@@ -19,6 +19,7 @@ export interface Message {
     output?: string;
     status: "running" | "completed" | "error";
   }>;
+  reasoning?: string;
 }
 
 interface ChatMessageProps {
@@ -165,6 +166,17 @@ export function ChatMessage({ message, isStreaming }: ChatMessageProps) {
                 >
                   {message.content}
                 </ReactMarkdown>
+              </div>
+            )}
+            {message.reasoning && message.reasoning.length > 0 && (
+              <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <div className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-1 flex items-center gap-1">
+                  <span>🤔</span>
+                  <span>思考过程</span>
+                </div>
+                <div className="text-xs text-amber-800 dark:text-amber-300 whitespace-pre-wrap font-mono">
+                  {message.reasoning}
+                </div>
               </div>
             )}
             {message.toolCalls && message.toolCalls.length > 0 && (

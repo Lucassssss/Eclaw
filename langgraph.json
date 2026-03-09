@@ -1,0 +1,6 @@
+{
+  "dependencies": ["./package.json", "./apps/web/package.json"],
+  "graphs": {
+    "deep_agent": "./deepagent.ts:deepAgentGraph"
+  }
+}

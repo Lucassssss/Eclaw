@@ -31,7 +31,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .turbo
 
 # Trae
-.trae
+# .trae
 
 # Next.js
 .next
@@ -42,3 +42,6 @@ apps/*/.next
 
 # Finder (MacOS) folder config
 .DS_Store
+
+# LangGraph API
+.langgraph_api
