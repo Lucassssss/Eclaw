@@ -66,7 +66,7 @@ router.post("/api/chat", async (req, res) => {
     const lastUserMessage = messages.filter(m => m.role === "user").pop()?.content || "";
 
     try {
-      await runChat(aiMessages, modelName, res);
+      await runChat(messages, modelName, res, sessionId, mode);
 
       res.write("data: [DONE]\n\n");
       addToHistory(sessionId, "user", lastUserMessage);

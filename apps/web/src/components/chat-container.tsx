@@ -705,6 +705,8 @@ export function ChatContainer() {
                         <DropdownMenuItem onClick={() => setModel("deepseek/deepseek-chat")}>deepseek-chat</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setModel("deepseek/deepseek-reasoner")}>deepseek-reasoner</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setModel("minimax/MiniMax-M2.5")}>MiniMax-M2.5</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setModel("minimax/MiniMax-M2.5-highspeed")}>MiniMax-M2.5-highspeed</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setModel("minimax/MiniMax-M2.1")}>MiniMax-M2.1</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
