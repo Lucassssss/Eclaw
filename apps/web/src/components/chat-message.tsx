@@ -121,7 +121,7 @@ export function ChatMessage({ message, isStreaming }: ChatMessageProps) {
             style={{ borderRadius: "4px" }}
           >
             {isUser ? (
-              <div className="whitespace-pre-wrap text-sm leading-relaxed">
+              <div className="whitespace-pre-wrap leading-relaxed">
                 {message.content}
               </div>
             ) : (
@@ -140,7 +140,7 @@ export function ChatMessage({ message, isStreaming }: ChatMessageProps) {
                     }
                     if (block.type === "text") {
                       return (
-                        <div key={block.id} className="markdown-content">
+                        <div key={block.id} className="markdown-content leading-relaxed">
                           <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             components={{
@@ -167,7 +167,7 @@ export function ChatMessage({ message, isStreaming }: ChatMessageProps) {
                                 return <h2 className="text-base font-semibold mb-2 mt-2">{children}</h2>;
                               },
                               h3({ children }) {
-                                return <h3 className="text-sm font-semibold mb-1 mt-2">{children}</h3>;
+                                return <h3 className="font-semibold mb-1 mt-2">{children}</h3>;
                               },
                               a({ href, children }) {
                                 return (
