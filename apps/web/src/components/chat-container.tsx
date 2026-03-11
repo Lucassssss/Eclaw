@@ -463,24 +463,25 @@ export function ChatContainer() {
   const allSubagentsDone = subagents.length > 0 && completedSubagents === subagents.length;
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
-      <Card className="border-border shadow-sm bg-card">
-        <CardHeader className="px-6 py-4 border-b">
+    <div className="w-full max-w-xl mx-auto">
+      <Card className="border-border shadow-sm bg-card min-h-screen border-l">
+        <CardHeader className="px-6 py-4 border-b py-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <div className="w-8 h-8 flex items-center justify-center">
-                <Bot className="w-5 h-5 text-foreground" />
+                {/* <Bot className="w-5 h-5 text-foreground" /> */}
+                <Sparkles className="w-5 h-5" fill="#00d492" strokeWidth={0}/>
               </div>
               <div>
                 <h1 className="text-base font-medium text-foreground">AI Assistant</h1>
-                <p className="text-xs text-muted-foreground">Powered by DeepSeek</p>
+                {/* <p className="text-xs text-muted-foreground">Powered by DeepSeek</p> */}
               </div>
             </div>
             <SettingsButton onClick={() => setSettingsOpen(true)} />
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <ScrollArea ref={scrollRef} className="h-[65vh]">
+          <ScrollArea ref={scrollRef} className="h-[80vh]">
             <div className="p-6">
               {showDeepAgentUI ? (
                 <>
@@ -611,7 +612,7 @@ export function ChatContainer() {
                   {messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
                       <div className="w-12 h-12 flex items-center justify-center mb-4">
-                        <Bot className="w-8 h-8 text-muted-foreground" />
+                        <Sparkles className="w-8 h-8 text-muted-foreground" fill="#00d492" strokeWidth={0}/>
                       </div>
                       <h2 className="text-lg font-medium text-foreground mb-2">欢迎使用 AI 助手</h2>
                       <p className="text-sm text-muted-foreground max-w-xs">
@@ -631,7 +632,8 @@ export function ChatContainer() {
                         <div className="flex justify-start">
                           <div className="flex items-start gap-3 max-w-[85%] w-[85%]">
                             <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                              <Bot className="w-5 h-5 text-foreground" />
+                              <Sparkles className="w-5 h-5 text-muted-foreground" fill="#00d492" strokeWidth={0}/>
+                              {/* <Bot className="w-5 h-5 text-foreground" /> */}
                             </div>
                             <div className="pt-1">
                               <div className="flex gap-1">
