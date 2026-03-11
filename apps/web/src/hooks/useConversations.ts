@@ -86,17 +86,17 @@ export const useConversationStore = create<ConversationStore>((set, get) => ({
 
   selectConversation: async (id: string) => {
     set({ loading: true, error: null });
+    
     try {
-      const [convRes, msgRes] = await Promise.all([
-        fetch(`${API_BASE}/conversations/${id}`),
-        fetch(`${API_BASE}/conversations/${id}/messages`),
-      ]);
-      
+      const convRes = await fetch(`${API_BASE}/conversations/${id}`);
       const convData = await convRes.json();
+      
+      set({ currentConversation: convData.conversation });
+      
+      const msgRes = await fetch(`${API_BASE}/conversations/${id}/messages`);
       const msgData = await msgRes.json();
       
       set({
-        currentConversation: convData.conversation,
         messages: (msgData.messages || []).map((m: any) => ({
           id: m.id,
           role: m.role,

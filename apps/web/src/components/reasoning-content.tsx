@@ -34,7 +34,7 @@ export function ReasoningContent({ reasoning, isComplete = true, isCollapsed: ex
       <Button
         onClick={handleToggle}
         variant="ghost"
-        className="flex text-xs text-gray-500 items-center gap-1.5 w-full justify-start bg-neutral-50 dark:bg-neutral-800 font-normal"
+        className="flex text-xs text-gray-500 items-center gap-1.5 w-full justify-start bg-zinc-100 dark:bg-neutral-800 font-normal"
       >
         {isCollapsed ? (
           <ChevronRight className="w-3.5 h-3.5" />

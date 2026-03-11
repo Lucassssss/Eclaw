@@ -1,20 +1,20 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChatMessage, type Message } from "./chat-message";
+import { ChatMessage, type Message, type MessageBlock, type MessageBlockType } from "./chat-message";
 import { 
   Bot, 
   Sparkles, 
   Send, 
   Loader2, 
   ChevronDown,
-  Plus,
   Paperclip,
   Zap,
   Globe,
   Cpu,
-  Sparkles as SparklesIcon
+  Sparkles as SparklesIcon,
+  ArrowUp
 } from "lucide-react";
 import { useConversationStore } from "@/hooks/useConversations";
 import { cn } from "@/lib/utils";
@@ -25,33 +25,23 @@ type ChatMode = "auto" | "agent" | "manual" | "deep-agent";
 
 interface StreamingMessage extends Message {
   isComplete: boolean;
+  blocks?: MessageBlock[];
+  timestamp: number;
 }
 
 const MODELS = [
   { id: "deepseek/deepseek-chat", name: "DeepSeek Chat", provider: "DeepSeek" },
-  { id: "deepseek/deepseek-coder", name: "DeepSeek Coder", provider: "DeepSeek" },
+  { id: "deepseek/deepseek-reasoner", name: "DeepSeek Reasoner", provider: "DeepSeek" },
   { id: "openai/gpt-4o", name: "GPT-4o", provider: "OpenAI" },
   { id: "anthropic/claude-3-opus", name: "Claude 3 Opus", provider: "Anthropic" },
 ];
 
 const AGENT_TYPES: { id: ChatMode; name: string; icon: React.ReactNode; description: string }[] = [
   { 
-    id: "deep-agent", 
-    name: "深度代理", 
-    icon: <Zap className="w-4 h-4" />,
-    description: "多代理协同工作" 
-  },
-  { 
     id: "agent", 
     name: "智能代理", 
     icon: <Bot className="w-4 h-4" />,
     description: "单代理自动决策" 
-  },
-  { 
-    id: "manual", 
-    name: "手动模式", 
-    icon: <Cpu className="w-4 h-4" />,
-    description: "完全手动控制" 
   },
   { 
     id: "auto", 
@@ -65,12 +55,14 @@ export function ChatPanel() {
   const { 
     messages: storeMessages, 
     currentConversation,
+    loading: storeLoading,
   } = useConversationStore();
   
   const [messages, setMessages] = useState<StreamingMessage[]>([]);
   const [input, setInput] = useState("");
+  const [inputHeight, setInputHeight] = useState(52);
   const [isLoading, setIsLoading] = useState(false);
-  const [mode, setMode] = useState<ChatMode>("deep-agent");
+  const [mode, setMode] = useState<ChatMode>("agent");
   const [model, setModel] = useState<string>("deepseek/deepseek-chat");
   const [showModelSelector, setShowModelSelector] = useState(false);
   const [showAgentSelector, setShowAgentSelector] = useState(false);
@@ -80,6 +72,8 @@ export function ChatPanel() {
   const showDeepAgentUI = true;
 
   useEffect(() => {
+    if (storeLoading) return;
+    
     if (storeMessages && storeMessages.length > 0) {
       setMessages(storeMessages.map(m => ({
         ...m,
@@ -88,20 +82,41 @@ export function ChatPanel() {
     } else {
       setMessages([]);
     }
-  }, [storeMessages]);
+  }, [storeMessages, storeLoading]);
 
-  const scrollToBottom = () => {
-    if (scrollRef.current) {
-      const scrollArea = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollArea) {
-        scrollArea.scrollTop = scrollArea.scrollHeight;
+  const scrollToBottom = useCallback(() => {
+    requestAnimationFrame(() => {
+      if (scrollRef.current) {
+        const scrollArea = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+        if (scrollArea) {
+          scrollArea.scrollTop = scrollArea.scrollHeight;
+        }
       }
-    }
-  };
+    });
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
+
+  const adjustTextareaHeight = useCallback(() => {
+    requestAnimationFrame(() => {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+      
+      textarea.style.height = 'auto';
+      const newHeight = Math.min(Math.max(textarea.scrollHeight, 52), 320);
+      textarea.style.height = `${newHeight}px`;
+      setInputHeight(newHeight);
+    });
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      adjustTextareaHeight();
+    }, 0);
+    return () => clearTimeout(timeoutId);
+  }, [input, adjustTextareaHeight]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -118,11 +133,15 @@ export function ChatPanel() {
       role: "user",
       content: input.trim(),
       isComplete: true,
-      createdAt: Date.now(),
+      timestamp: Date.now(),
     };
     
     setMessages(prev => [...prev, userMessage]);
     setInput("");
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      setInputHeight(52);
+    }
     setIsLoading(true);
     
     try {
@@ -147,38 +166,254 @@ export function ChatPanel() {
         role: "assistant",
         content: "",
         isComplete: false,
-        createdAt: Date.now(),
+        timestamp: Date.now(),
+        blocks: [],
       };
       
       setMessages(prev => [...prev, assistantMessage]);
 
       const decoder = new TextDecoder();
-      let done = false;
+      let currentReasoning = "";
+      let currentTextContent = "";
+      let currentToolCallId = "";
+      let currentToolInput = "";
+      let currentToolName = "";
+      let currentToolOutput = "";
+      let currentBlockType: MessageBlockType | null = null;
 
-      while (!done) {
+      const collapsePreviousBlock = (blocks: MessageBlock[]): MessageBlock[] => {
+        if (blocks.length === 0) return blocks;
+        return blocks.map((b, i) => 
+          i < blocks.length - 1 ? { ...b, isCollapsed: true } : { ...b, isCollapsed: false }
+        );
+      };
+
+      while (true) {
         const { value, done: doneReading } = await reader.read();
         
+        if (doneReading) break;
+        
         if (value) {
-          const chunk = decoder.decode(value, { stream: true });
-          setMessages(prev => {
-            const newMessages = [...prev];
-            const lastMsg = newMessages[newMessages.length - 1];
-            if (lastMsg && lastMsg.role === "assistant") {
-              lastMsg.content += chunk;
+          const chunk = decoder.decode(value);
+          const lines = chunk.split("\n");
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const data = line.slice(6);
+              if (data === "[DONE]" || data === "{}") continue;
+
+              try {
+                const parsed = JSON.parse(data);
+
+                if (parsed.type === "reasoning") {
+                  const newType: MessageBlockType = "reasoning";
+                  if (currentBlockType !== newType) {
+                    currentBlockType = newType;
+                    currentReasoning = parsed.content || "";
+                    setMessages((prev) =>
+                      prev.map((m) => {
+                        if (m.id !== assistantMessage.id) return m;
+                        const collapsedBlocks = collapsePreviousBlock(m.blocks || []);
+                        return {
+                          ...m,
+                          blocks: [
+                            ...collapsedBlocks,
+                            {
+                              id: `reasoning-${Date.now()}`,
+                              type: newType,
+                              content: currentReasoning,
+                              isCollapsed: false
+                            }
+                          ]
+                        };
+                      })
+                    );
+                  } else {
+                    currentReasoning += parsed.content || "";
+                    setMessages((prev) =>
+                      prev.map((m) => {
+                        if (m.id !== assistantMessage.id) return m;
+                        const blocks = m.blocks || [];
+                        const lastBlock = blocks[blocks.length - 1];
+                        if (lastBlock && lastBlock.type === "reasoning") {
+                          return {
+                            ...m,
+                            blocks: [
+                              ...blocks.slice(0, -1),
+                              { ...lastBlock, content: currentReasoning }
+                            ]
+                          };
+                        }
+                        return m;
+                      })
+                    );
+                  }
+                } else if (parsed.type === "text") {
+                  const newType: MessageBlockType = "text";
+                  if (currentBlockType !== newType) {
+                    currentBlockType = newType;
+                    currentTextContent = parsed.content || "";
+                    setMessages((prev) =>
+                      prev.map((m) => {
+                        if (m.id !== assistantMessage.id) return m;
+                        const collapsedBlocks = collapsePreviousBlock(m.blocks || []);
+                        return {
+                          ...m,
+                          content: currentTextContent,
+                          blocks: [
+                            ...collapsedBlocks,
+                            {
+                              id: `text-${Date.now()}`,
+                              type: newType,
+                              content: currentTextContent,
+                              isCollapsed: false
+                            }
+                          ]
+                        };
+                      })
+                    );
+                  } else {
+                    currentTextContent += parsed.content || "";
+                    setMessages((prev) =>
+                      prev.map((m) => {
+                        if (m.id !== assistantMessage.id) return m;
+                        const blocks = m.blocks || [];
+                        const lastBlock = blocks[blocks.length - 1];
+                        if (lastBlock && lastBlock.type === "text") {
+                          return {
+                            ...m,
+                            content: currentTextContent,
+                            blocks: [
+                              ...blocks.slice(0, -1),
+                              { ...lastBlock, content: currentTextContent }
+                            ]
+                          };
+                        }
+                        return m;
+                      })
+                    );
+                  }
+                } else if (parsed.type === "tool_call") {
+                  const newType: MessageBlockType = "tool-call";
+                  if (currentBlockType !== newType) {
+                    currentBlockType = newType;
+                    currentToolCallId = parsed.id || "";
+                    currentToolName = parsed.name || "";
+                    currentToolInput = parsed.input || "";
+                    setMessages((prev) =>
+                      prev.map((m) => {
+                        if (m.id !== assistantMessage.id) return m;
+                        const collapsedBlocks = collapsePreviousBlock(m.blocks || []);
+                        return {
+                          ...m,
+                          blocks: [
+                            ...collapsedBlocks,
+                            {
+                              id: `tool-call-${Date.now()}`,
+                              type: newType,
+                              name: currentToolName,
+                              input: currentToolInput,
+                              status: "running",
+                              isCollapsed: false
+                            }
+                          ]
+                        };
+                      })
+                    );
+                  } else {
+                    currentToolCallId = parsed.id || "";
+                    currentToolName = parsed.name || "";
+                    currentToolInput = parsed.input || "";
+                    setMessages((prev) =>
+                      prev.map((m) => {
+                        if (m.id !== assistantMessage.id) return m;
+                        const blocks = m.blocks || [];
+                        const lastBlock = blocks[blocks.length - 1];
+                        if (lastBlock && lastBlock.type === "tool-call") {
+                          return {
+                            ...m,
+                            blocks: [
+                              ...blocks.slice(0, -1),
+                              {
+                                ...lastBlock,
+                                name: currentToolName,
+                                input: currentToolInput
+                              }
+                            ]
+                          };
+                        }
+                        return m;
+                      })
+                    );
+                  }
+                } else if (parsed.type === "tool_result") {
+                  const newType: MessageBlockType = "tool-result";
+                  currentBlockType = newType;
+                  currentToolOutput = parsed.output || "";
+                  setMessages((prev) =>
+                    prev.map((m) => {
+                      if (m.id !== assistantMessage.id) return m;
+                      const blocks = m.blocks || [];
+                      const lastBlock = blocks[blocks.length - 1];
+                      if (lastBlock && (lastBlock.type === "tool-call" || lastBlock.type === "tool-result")) {
+                        return {
+                          ...m,
+                          blocks: [
+                            ...blocks.slice(0, -1),
+                            {
+                              ...lastBlock,
+                              type: newType,
+                              output: currentToolOutput,
+                              status: "completed",
+                              isCollapsed: false
+                            }
+                          ]
+                        };
+                      }
+                      return m;
+                    })
+                  );
+                } else if (parsed.type === "tool_error") {
+                  const newType: MessageBlockType = "tool-result";
+                  currentBlockType = newType;
+                  const errorMsg = parsed.error || "";
+                  setMessages((prev) =>
+                    prev.map((m) => {
+                      if (m.id !== assistantMessage.id) return m;
+                      const blocks = m.blocks || [];
+                      const lastBlock = blocks[blocks.length - 1];
+                      if (lastBlock && (lastBlock.type === "tool-call" || lastBlock.type === "tool-result")) {
+                        return {
+                          ...m,
+                          blocks: [
+                            ...blocks.slice(0, -1),
+                            {
+                              ...lastBlock,
+                              type: newType,
+                              output: errorMsg,
+                              status: "error",
+                              isCollapsed: false
+                            }
+                          ]
+                        };
+                      }
+                      return m;
+                    })
+                  );
+                }
+              } catch {
+                // Ignore parse errors
+              }
             }
-            return newMessages;
-          });
+          }
         }
       }
 
-      setMessages(prev => {
-        const newMessages = [...prev];
-        const lastMsg = newMessages[newMessages.length - 1];
-        if (lastMsg && lastMsg.role === "assistant") {
-          lastMsg.isComplete = true;
-        }
-        return newMessages;
-      });
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantMessage.id ? { ...m, isComplete: true } : m
+        )
+      );
     } catch (error) {
       console.error("发送消息失败:", error);
     } finally {
@@ -189,8 +424,13 @@ export function ChatPanel() {
   const currentModel = MODELS.find(m => m.id === model);
   const currentAgent = AGENT_TYPES.find(a => a.id === mode);
 
+  const handleClickOutside = () => {
+    setShowModelSelector(false);
+    setShowAgentSelector(false);
+  };
+
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background" onClick={handleClickOutside}>
       {/* Header */}
       <header className="px-6 py-4 border-b border-border/50 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
@@ -210,7 +450,7 @@ export function ChatPanel() {
           <div className="px-6 py-8 max-w-4xl mx-auto">
             {showDeepAgentUI ? (
               <>
-                {messages.length === 0 ? (
+                {(messages.length === 0 && !storeLoading) ? (
                   <div className="flex flex-col items-center justify-center min-h-[60vh] text-center animate-fade-in">
                     <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-6">
                       <SparklesIcon className="w-10 h-10 text-primary" />
@@ -247,7 +487,7 @@ export function ChatPanel() {
               </>
             ) : (
               <>
-                {messages.length === 0 ? (
+                {(messages.length === 0 && !storeLoading) ? (
                   <div className="flex flex-col items-center justify-center min-h-[60vh] text-center animate-fade-in">
                     <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-6">
                       <Bot className="w-10 h-10 text-primary" />
@@ -290,14 +530,63 @@ export function ChatPanel() {
       {/* 输入框区域 - 固定底部 */}
       <div className="p-4 shrink-0">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200 focus-within:shadow-md focus-within:border-primary/30 overflow-hidden">
-            
-            {/* 工具栏 */}
-            <div className="flex items-center gap-2 px-3 py-2 border-b border-border/30">
+          <div 
+            className="bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200 focus-within:shadow-md focus-within:border-primary/30"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 输入区域 - 在上面 */}
+            <div className="relative flex items-center" style={{ minHeight: inputHeight }}>
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={showDeepAgentUI ? "请输入你想去的旅行目的地..." : "输入你的问题..."}
+                disabled={isLoading}
+                rows={1}
+                className="w-full px-4 py-3 pr-14 resize-none bg-transparent border-none outline-none text-base leading-relaxed"
+                style={{ 
+                  minHeight: '52px',
+                  maxHeight: '320px',
+                  height: 'auto'
+                }}
+              />
+              <button
+                onClick={handleSend}
+                disabled={!input.trim() || isLoading}
+                className={cn(
+                  "absolute right-4 bottom-2 p-1 rounded-full transition-all duration-200",
+                  input.trim() && !isLoading
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                    : "bg-muted text-muted-foreground cursor-not-allowed"
+                )}
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <ArrowUp className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+
+            {/* 分隔线 */}
+            <div className="h-px " />
+
+            {/* 工具栏 - 在下面 */}
+            <div className="flex items-center gap-2 px-3 py-1.5">
+              {/* 附件上传 */}
+              <button
+                className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                title="上传附件"
+              >
+                <Paperclip className="w-4 h-4" />
+              </button>
+              <div className="w-px h-4 bg-border/50" />
               {/* 模型选择 */}
-              <div className="relative">
+              <div className="relative" onClick={(e) => e.stopPropagation()}>
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setShowModelSelector(!showModelSelector);
                     setShowAgentSelector(false);
                   }}
@@ -309,13 +598,14 @@ export function ChatPanel() {
                 </button>
                 
                 {showModelSelector && (
-                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-card border border-border/50 rounded-xl shadow-lg overflow-hidden z-50">
+                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-card border border-border/50 rounded-xl shadow-xl overflow-hidden z-[100]">
                     <div className="p-2">
                       <p className="text-xs font-medium text-muted-foreground px-2 py-1">选择模型</p>
                       {MODELS.map((m) => (
                         <button
                           key={m.id}
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setModel(m.id);
                             setShowModelSelector(false);
                           }}
@@ -337,9 +627,10 @@ export function ChatPanel() {
               <div className="w-px h-4 bg-border/50" />
 
               {/* Agent 类型选择 */}
-              <div className="relative">
+              <div className="relative" onClick={(e) => e.stopPropagation()}>
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setShowAgentSelector(!showAgentSelector);
                     setShowModelSelector(false);
                   }}
@@ -354,13 +645,14 @@ export function ChatPanel() {
                 </button>
                 
                 {showAgentSelector && (
-                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-card border border-border/50 rounded-xl shadow-lg overflow-hidden z-50">
+                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-card border border-border/50 rounded-xl shadow-xl overflow-hidden z-[100]">
                     <div className="p-2">
                       <p className="text-xs font-medium text-muted-foreground px-2 py-1">选择模式</p>
                       {AGENT_TYPES.map((agent) => (
                         <button
                           key={agent.id}
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setMode(agent.id);
                             setShowAgentSelector(false);
                           }}
@@ -388,44 +680,6 @@ export function ChatPanel() {
 
               <div className="flex-1" />
 
-              {/* 附件上传 */}
-              <button
-                className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-                title="上传附件"
-              >
-                <Paperclip className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* 输入区域 */}
-            <div className="relative flex items-end">
-              <textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={showDeepAgentUI ? "请输入你想去的旅行目的地..." : "输入你的问题..."}
-                disabled={isLoading}
-                rows={1}
-                className="w-full min-h-[56px] max-h-[200px] p-4 pr-14 resize-none bg-transparent border-none outline-none text-sm"
-                style={{ borderRadius: '0' }}
-              />
-              <button
-                onClick={handleSend}
-                disabled={!input.trim() || isLoading}
-                className={cn(
-                  "absolute right-2 bottom-2 p-2.5 rounded-xl transition-all duration-200",
-                  input.trim() && !isLoading
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
-                    : "bg-muted text-muted-foreground cursor-not-allowed"
-                )}
-              >
-                {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Send className="w-5 h-5" />
-                )}
-              </button>
             </div>
           </div>
         </div>

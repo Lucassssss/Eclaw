@@ -9,6 +9,22 @@ import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { ReasoningContent } from "./reasoning-content";
 import { ToolResultContent } from "./tool-result-content";
 
+function formatMessageTime(timestamp: number | Date): string {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  if (diffMins < 1) return "刚刚";
+  if (diffMins < 60) return `${diffMins}分钟前`;
+  if (diffHours < 24) return `${diffHours}小时前`;
+  if (diffDays < 7) return `${diffDays}天前`;
+  
+  return date.toLocaleDateString("zh-CN", { month: "short", day: "numeric" });
+}
+
 export type MessageBlockType = "reasoning" | "text" | "tool-call" | "tool-result";
 
 export interface MessageBlock {
@@ -82,11 +98,16 @@ export function ChatMessage({ message, isStreaming }: ChatMessageProps) {
   return (
     <div className={isUser ? "flex justify-end" : "flex justify-start"}>
       <div className={`flex gap-3 max-w-[85%] w-[85%] ${isUser ? "flex-row-reverse" : ""}`}>
-        <div className="w-8 h-8 flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 flex items-center justify-center shrink-0">
           {isUser ? (
-            <User className="w-5 h-5 text-muted-foreground" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center shadow-sm">
+              <User className="w-5 h-5 text-white" />
+            </div>
+            // <div></div>
           ) : (
-            <Bot className="w-5 h-5 text-foreground" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm">
+              <Bot className="w-5 h-5 text-primary" />
+            </div>
           )}
         </div>
         <div className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
@@ -302,14 +323,14 @@ export function ChatMessage({ message, isStreaming }: ChatMessageProps) {
             )}
           </div>
           <div className="flex items-center gap-2 mt-1.5 px-1">
-            <span className="text-xs text-muted-foreground">
-              {new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            <span className="text-xs text-muted-foreground/70">
+              {formatMessageTime(message.timestamp)}
             </span>
             {!isUser && copied && (
               <span className="text-xs text-muted-foreground">已复制</span>
             )}
             {!isUser && isStreaming && (
-              <span className="text-xs text-muted-foreground">正在输入...</span>
+              <span className="text-xs text-primary animate-pulse">正在输入...</span>
             )}
           </div>
         </div>
