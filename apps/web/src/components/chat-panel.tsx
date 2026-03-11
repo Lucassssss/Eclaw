@@ -117,7 +117,7 @@ export function ChatPanel() {
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       adjustTextareaHeight();
-    }, 0);
+    }, 150);
     return () => clearTimeout(timeoutId);
   }, [input, adjustTextareaHeight]);
 

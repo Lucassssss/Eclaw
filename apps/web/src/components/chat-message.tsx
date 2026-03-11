@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import { User, Bot, Copy, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -85,7 +85,7 @@ function CodeBlock({ className, children }: { className?: string; children?: Rea
   );
 }
 
-export function ChatMessage({ message, isStreaming }: ChatMessageProps) {
+export const ChatMessage = memo(function ChatMessage({ message, isStreaming }: ChatMessageProps) {
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
 
@@ -337,4 +337,4 @@ export function ChatMessage({ message, isStreaming }: ChatMessageProps) {
       </div>
     </div>
   );
-}
+});
