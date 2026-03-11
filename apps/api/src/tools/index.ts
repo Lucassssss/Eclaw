@@ -20,6 +20,14 @@ const calculatorTool = tool({
   },
 });
 
+const getCurrentTimeTool = tool({
+  description: 'Get the current time',
+  inputSchema: z.object({}),
+  execute: async () => {
+    return new Date().toLocaleString();
+  },
+});
+
 const weatherTool = tool({
   description: 'Get the weather in a location',
   inputSchema: z.object({
@@ -31,6 +39,7 @@ const weatherTool = tool({
 });
 
 export const tools: ToolSet = {
+  getCurrentTimeTool,
   weatherTool,
   calculatorTool,
   stagehandTool,

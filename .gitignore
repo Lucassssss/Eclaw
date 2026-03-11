@@ -45,3 +45,5 @@ apps/*/.next
 
 # LangGraph API
 .langgraph_api
+
+friend-g

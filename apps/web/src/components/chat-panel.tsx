@@ -32,9 +32,12 @@ interface StreamingMessage extends Message {
 const MODELS = [
   { id: "deepseek/deepseek-chat", name: "DeepSeek Chat", provider: "DeepSeek" },
   { id: "deepseek/deepseek-reasoner", name: "DeepSeek Reasoner", provider: "DeepSeek" },
-  { id: "openai/gpt-4o", name: "GPT-4o", provider: "OpenAI" },
-  { id: "anthropic/claude-3-opus", name: "Claude 3 Opus", provider: "Anthropic" },
+  { id: "minimax/MiniMax-M2.5", name: "MiniMax-M2.5", provider: "Minimax" },
+  { id: "minimax/MiniMax-M2.5-highspeed", name: "MiniMax-M2.5-HighSpeed", provider: "Minimax" },
+  { id: "minimax/MiniMax-M2.1-highspeed", name: "MiniMax-M2.1-HighSpeed", provider: "Minimax" },
 ];
+
+
 
 const AGENT_TYPES: { id: ChatMode; name: string; icon: React.ReactNode; description: string }[] = [
   { 
