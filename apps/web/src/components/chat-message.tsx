@@ -96,16 +96,16 @@ export const ChatMessage = memo(function ChatMessage({ message, isStreaming }: C
 
   return (
     <div className={isUser ? "flex justify-end" : "flex justify-start w-full"}>
-      <div className={`flex gap-3 max-w-full min-w-0 ${isUser ? "flex-row-reverse max-w-[85%]" : "w-full"}`}>
-        <div className="w-9 h-9 flex items-center justify-center shrink-0">
+      <div className={`chat-message-wrapper flex gap-2 sm:gap-3 max-w-full min-w-0 ${isUser ? "flex-row-reverse max-w-[90%] sm:max-w-[85%]" : "w-full"}`}>
+        {/* 头像 - 使用响应式类和容器查询在窄宽度时自动隐藏 */}
+        <div className="chat-avatar hidden sm:flex w-8 h-8 sm:w-9 sm:h-9 items-center justify-center shrink-0">
           {isUser ? (
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center shadow-sm">
-              <User className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center shadow-sm">
+              <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            // <div></div>
           ) : (
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm">
-              <Bot className="w-5 h-5 text-primary" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm">
+              <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
             </div>
           )}
         </div>

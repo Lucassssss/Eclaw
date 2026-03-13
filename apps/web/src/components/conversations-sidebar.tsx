@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useConversationStore } from "@/hooks/useConversations";
-import { MessageSquare, Plus, Trash2, Loader2, MessageCircle, Sparkles } from "lucide-react";
+import { MessageSquare, Plus, Trash2, Loader2, Clock } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
@@ -51,81 +51,138 @@ export function ConversationsSidebar() {
     return date.toLocaleDateString("zh-CN", { month: "short", day: "numeric" });
   };
 
+  // 按时间分组对话
+  const groupConversations = () => {
+    const today: typeof conversations = [];
+    const yesterday: typeof conversations = [];
+    const thisWeek: typeof conversations = [];
+    const older: typeof conversations = [];
+
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const yesterdayStart = todayStart - 86400000;
+    const weekStart = todayStart - 7 * 86400000;
+
+    conversations.forEach((conv) => {
+      const timestamp = conv.updatedAt;
+      if (timestamp >= todayStart) {
+        today.push(conv);
+      } else if (timestamp >= yesterdayStart) {
+        yesterday.push(conv);
+      } else if (timestamp >= weekStart) {
+        thisWeek.push(conv);
+      } else {
+        older.push(conv);
+      }
+    });
+
+    return { today, yesterday, thisWeek, older };
+  };
+
+  const groups = groupConversations();
+
+  const renderConversationItem = (conv: typeof conversations[0]) => (
+    <div
+      key={conv.id}
+      onClick={() => handleSelect(conv.id)}
+      className={cn(
+        "group flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition-all duration-200",
+        currentConversation?.id === conv.id
+          ? "bg-primary/10 border border-primary/20"
+          : "hover:bg-muted/60 border border-transparent"
+      )}
+    >
+      <div className={cn(
+        "w-7 h-7 rounded-md flex items-center justify-center shrink-0 transition-colors",
+        currentConversation?.id === conv.id 
+          ? "bg-primary/15" 
+          : "bg-muted/50 group-hover:bg-muted"
+      )}>
+        <MessageSquare className={cn(
+          "w-3.5 h-3.5",
+          currentConversation?.id === conv.id ? "text-primary" : "text-muted-foreground/70"
+        )} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className={cn(
+          "text-sm truncate",
+          currentConversation?.id === conv.id 
+            ? "font-medium text-primary" 
+            : "text-foreground/80 group-hover:text-foreground"
+        )}>
+          {conv.title}
+        </div>
+        <div className="flex items-center gap-1 mt-0.5">
+          <Clock className="w-3 h-3 text-muted-foreground/50" />
+          <span className="text-[11px] text-muted-foreground/60">{formatDate(conv.updatedAt)}</span>
+        </div>
+      </div>
+      <button
+        onClick={(e) => handleDelete(e, conv.id)}
+        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-destructive/10 rounded-md transition-all shrink-0"
+        aria-label="删除对话"
+      >
+        <Trash2 className="w-3.5 h-3.5 text-muted-foreground/70 hover:text-destructive" />
+      </button>
+    </div>
+  );
+
+  const renderGroup = (title: string, items: typeof conversations) => {
+    if (items.length === 0) return null;
+    return (
+      <div className="mb-4">
+        <div className="px-3 py-1.5 text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wider">
+          {title}
+        </div>
+        <div className="space-y-0.5">
+          {items.map(renderConversationItem)}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-card/50">
       {/* Header */}
-      <div className="p-4 space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h2 className="font-semibold text-foreground">对话历史</h2>
-            <p className="text-xs text-muted-foreground">{conversations.length} 个对话</p>
-          </div>
+      <div className="p-3 space-y-3 border-b border-border/30">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-sm text-foreground/90">对话</h2>
+          <span className="text-[11px] text-muted-foreground/60 bg-muted/50 px-1.5 py-0.5 rounded">
+            {conversations.length}
+          </span>
         </div>
         <button
           onClick={handleNewChat}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl transition-all duration-200 font-medium text-sm shadow-sm hover:shadow-md active:scale-[0.98]"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-all duration-200 font-medium text-sm shadow-sm hover:shadow active:scale-[0.98]"
         >
           <Plus className="w-4 h-4" />
-          新对话
+          <span>新对话</span>
         </button>
       </div>
 
       {/* Conversation List */}
-      <ScrollArea className="flex-1 px-3 pb-3">
-        <div className="space-y-1">
+      <ScrollArea className="flex-1">
+        <div className="p-2">
           {loading && conversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="w-6 h-6 animate-spin text-primary mb-3" />
-              <p className="text-xs text-muted-foreground">加载中...</p>
+              <Loader2 className="w-5 h-5 animate-spin text-primary mb-2" />
+              <p className="text-xs text-muted-foreground/70">加载中...</p>
             </div>
           ) : conversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center px-4">
-              <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
-                <MessageSquare className="w-7 h-7 text-muted-foreground/50" />
+              <div className="w-12 h-12 rounded-xl bg-muted/30 flex items-center justify-center mb-3">
+                <MessageSquare className="w-6 h-6 text-muted-foreground/40" />
               </div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">暂无对话</p>
-              <p className="text-xs text-muted-foreground/70">点击上方按钮开始新对话</p>
+              <p className="text-sm text-muted-foreground/70 mb-0.5">暂无对话</p>
+              <p className="text-xs text-muted-foreground/50">点击上方按钮开始</p>
             </div>
           ) : (
-            conversations.map((conv, index) => (
-              <div
-                key={conv.id}
-                onClick={() => handleSelect(conv.id)}
-                className={cn(
-                  "group flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200",
-                  currentConversation?.id === conv.id
-                    ? "bg-primary/10 text-primary"
-                    : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
-                )}
-                style={{ animationDelay: `${index * 30}ms` }}
-              >
-                {/* <div className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors",
-                  currentConversation?.id === conv.id 
-                    ? "bg-primary/20" 
-                    : "bg-muted group-hover:bg-muted/70"
-                )}>
-                  <MessageSquare className={cn(
-                    "w-4 h-4",
-                    currentConversation?.id === conv.id ? "text-primary" : "text-muted-foreground"
-                  )} />
-                </div> */}
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm truncate font-medium">{conv.title}</div>
-                  {/* <div className="text-xs text-muted-foreground/70">{formatDate(conv.updatedAt)}</div> */}
-                </div>
-                <button
-                  onClick={(e) => handleDelete(e, conv.id)}
-                  className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-destructive/10 rounded-lg transition-all"
-                  aria-label="删除对话"
-                >
-                  <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
-                </button>
-              </div>
-            ))
+            <>
+              {renderGroup("今天", groups.today)}
+              {renderGroup("昨天", groups.yesterday)}
+              {renderGroup("近 7 天", groups.thisWeek)}
+              {renderGroup("更早", groups.older)}
+            </>
           )}
         </div>
       </ScrollArea>

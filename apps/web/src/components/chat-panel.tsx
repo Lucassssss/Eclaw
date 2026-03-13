@@ -447,10 +447,10 @@ export function ChatPanel() {
         </div>
       </header>
 
-      {/* 聊天内容区域 - 独立滚动 */}
-      <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
+      {/* 聊天内容区域 - 独立滚动，支持容器查询 */}
+      <div className="chat-container flex-1 min-h-0 min-w-0 overflow-hidden">
         <ScrollArea className="h-full w-full" ref={scrollRef}>
-          <div className="px-4 sm:px-6 py-8 w-full max-w-full min-w-0">
+          <div className="px-3 sm:px-6 py-6 sm:py-8 w-full max-w-full min-w-0">
             {showDeepAgentUI ? (
               <>
                 {(messages.length === 0 && !storeLoading) ? (

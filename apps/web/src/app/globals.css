@@ -132,6 +132,22 @@
     max-width: 100%;
     height: auto;
   }
+
+  /* 聊天区域容器查询支持 */
+  .chat-container {
+    container-type: inline-size;
+    container-name: chat;
+  }
+
+  /* 在容器宽度小于 400px 时隐藏头像 */
+  @container chat (max-width: 400px) {
+    .chat-avatar {
+      display: none !important;
+    }
+    .chat-message-wrapper {
+      gap: 0.5rem !important;
+    }
+  }
   
   .animate-fade-in {
     animation: fadeIn 0.3s ease-out forwards;
