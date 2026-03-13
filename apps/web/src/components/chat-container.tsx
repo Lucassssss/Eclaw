@@ -608,7 +608,7 @@ export function ChatContainer() {
 
                       {isTyping && !allSubagentsDone && (
                         <div className="flex justify-start">
-                          <div className="flex items-start gap-3 max-w-[85%] w-full">
+                          <div className="flex items-start gap-3 max-w-[85%] overflow-hidden w-full">
                             <div className="w-8 h-8 flex items-center justify-center shrink-0">
                               <Bot className="w-5 h-5 text-foreground" />
                             </div>

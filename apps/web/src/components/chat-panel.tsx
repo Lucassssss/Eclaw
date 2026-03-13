@@ -450,7 +450,7 @@ export function ChatPanel() {
       {/* 聊天内容区域 - 独立滚动 */}
       <div className="flex-1 min-h-0 overflow-hidden">
         <ScrollArea className="h-full" ref={scrollRef}>
-          <div className="px-6 py-8 w-full">
+          <div className="px-6 py-8 w-full max-w-[85%] md:w-full mx-auto">
             {showDeepAgentUI ? (
               <>
                 {(messages.length === 0 && !storeLoading) ? (

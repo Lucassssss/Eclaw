@@ -60,7 +60,7 @@ function CodeBlock({ className, children }: { className?: string; children?: Rea
 
   if (inline) {
     return (
-      <code className="px-1 py-0.5 bg-muted rounded text-sm font-mono text-foreground break-all">
+      <code className="px-1 py-0.5 bg-muted rounded text-sm font-mono text-foreground max-w-full overflow-x-auto">
         {children}
       </code>
     );
@@ -72,7 +72,7 @@ function CodeBlock({ className, children }: { className?: string; children?: Rea
       style={oneDark as any}
       language={match?.[1] || "text"}
       PreTag="div"
-      className="rounded text-sm my-3 overflow-x-auto"
+      className="rounded text-sm my-3 overflow-x-scroll w-full max-w-full"
       customStyle={{
         margin: 0,
         padding: "1rem",
@@ -96,7 +96,7 @@ export const ChatMessage = memo(function ChatMessage({ message, isStreaming }: C
 
   return (
     <div className={isUser ? "flex justify-end" : "flex justify-start"}>
-      <div className={`flex gap-3 max-w-[85%] w-[85%] break-all ${isUser ? "flex-row-reverse" : ""}`}>
+      <div className={`flex gap-3 max-w-[85%] w-[85%] overflow-hidden break-all ${isUser ? "flex-row-reverse" : ""}`}>
         <div className="w-9 h-9 flex items-center justify-center shrink-0">
           {isUser ? (
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center shadow-sm">
@@ -124,7 +124,7 @@ export const ChatMessage = memo(function ChatMessage({ message, isStreaming }: C
                 {message.content}
               </div>
             ) : (
-              <div className="space-y-3 break-words overflow-hidden">
+              <div className="space-y-3 break-words">
                 {message.blocks && message.blocks.length > 0 ? (
                   message.blocks.map((block) => {
                     if (block.type === "reasoning") {
@@ -139,7 +139,7 @@ export const ChatMessage = memo(function ChatMessage({ message, isStreaming }: C
                     }
                     if (block.type === "text") {
                       return (
-                        <div key={block.id} className="markdown-content leading-relaxed break-words break-all overflow-hidden whitespace-pre-wrap">
+                        <div key={block.id} className="markdown-content leading-relaxed break-words break-all w-full max-w-full">
                           <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             components={{

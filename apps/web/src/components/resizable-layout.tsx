@@ -16,7 +16,7 @@ interface ResizableLayoutProps {
 
 export function ResizableLayout({
   defaultSidebarWidth = 220,
-  defaultArtifactWidth = 800,
+  defaultArtifactWidth = 700,
   minSidebarWidth = 200,
   minArtifactWidth = 640,
 }: ResizableLayoutProps) {
