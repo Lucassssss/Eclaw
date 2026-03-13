@@ -16,9 +16,9 @@ interface ResizableLayoutProps {
 
 export function ResizableLayout({
   defaultSidebarWidth = 220,
-  defaultArtifactWidth = 700,
+  defaultArtifactWidth = 800,
   minSidebarWidth = 200,
-  minArtifactWidth = 640,
+  minArtifactWidth = 420,
 }: ResizableLayoutProps) {
   const [sidebarWidth, setSidebarWidth] = React.useState(defaultSidebarWidth);
   const [artifactWidth, setArtifactWidth] = React.useState(defaultArtifactWidth);
