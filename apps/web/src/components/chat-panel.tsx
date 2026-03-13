@@ -448,9 +448,9 @@ export function ChatPanel() {
       </header>
 
       {/* 聊天内容区域 - 独立滚动 */}
-      <div className="flex-1 min-h-0 overflow-hidden">
-        <ScrollArea className="h-full" ref={scrollRef}>
-          <div className="px-6 py-8 w-full max-w-[85%] md:w-full mx-auto">
+      <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
+        <ScrollArea className="h-full w-full" ref={scrollRef}>
+          <div className="px-4 sm:px-6 py-8 w-full max-w-full min-w-0">
             {showDeepAgentUI ? (
               <>
                 {(messages.length === 0 && !storeLoading) ? (
@@ -464,11 +464,11 @@ export function ChatPanel() {
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-6 min-w-0 w-full">
                     {messages.map((message, index) => (
                       <div 
                         key={message.id} 
-                        className="animate-slide-up"
+                        className="animate-slide-up min-w-0 w-full"
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
                         <ChatMessage 
@@ -501,11 +501,11 @@ export function ChatPanel() {
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-6 min-w-0 w-full">
                     {messages.map((message, index) => (
                       <div 
                         key={message.id} 
-                        className="animate-slide-up"
+                        className="animate-slide-up min-w-0 w-full"
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
                         <ChatMessage 
@@ -531,8 +531,8 @@ export function ChatPanel() {
       </div>
       
       {/* 输入框区域 - 固定底部 */}
-      <div className="p-4 shrink-0">
-        <div className="max-w-4xl mx-auto">
+      <div className="p-4 shrink-0 min-w-0">
+        <div className="max-w-4xl mx-auto min-w-0 w-full">
           <div 
             className="bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200 focus-within:shadow-md focus-within:border-primary/30"
             onClick={(e) => e.stopPropagation()}

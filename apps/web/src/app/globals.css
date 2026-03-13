@@ -96,6 +96,43 @@
     overflow-wrap: break-word;
   }
   
+  /* 确保聊天内容在 flex 容器中正确收缩 */
+  .chat-content-container {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  
+  /* Markdown 内容溢出控制 */
+  .markdown-content {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  
+  .markdown-content pre {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  
+  .markdown-content code {
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+  
+  .markdown-content table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  
+  .markdown-content img {
+    max-width: 100%;
+    height: auto;
+  }
+  
   .animate-fade-in {
     animation: fadeIn 0.3s ease-out forwards;
   }

@@ -101,7 +101,7 @@ export function ResizableLayout({
       )}
 
       {/* Chat Area */}
-      <section className="flex-1 min-w-0 flex flex-col">
+      <section className="flex-1 min-w-0 flex flex-col overflow-hidden">
         <ChatPanel />
       </section>
 

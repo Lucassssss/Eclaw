@@ -95,8 +95,8 @@ export const ChatMessage = memo(function ChatMessage({ message, isStreaming }: C
   };
 
   return (
-    <div className={isUser ? "flex justify-end" : "flex justify-start"}>
-      <div className={`flex gap-3 max-w-[85%] w-[85%] overflow-hidden break-all ${isUser ? "flex-row-reverse" : ""}`}>
+    <div className={isUser ? "flex justify-end" : "flex justify-start w-full"}>
+      <div className={`flex gap-3 max-w-full min-w-0 ${isUser ? "flex-row-reverse max-w-[85%]" : "w-full"}`}>
         <div className="w-9 h-9 flex items-center justify-center shrink-0">
           {isUser ? (
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center shadow-sm">
@@ -109,10 +109,9 @@ export const ChatMessage = memo(function ChatMessage({ message, isStreaming }: C
             </div>
           )}
         </div>
-        <div className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
+        <div className={`flex flex-col min-w-0 flex-1 ${isUser ? "items-end" : "items-start"}`}>
           <div
-            // className={`group relative px-4 py-3 ${
-            className={`group relative ${
+            className={`group relative min-w-0 max-w-full ${
               isUser
                 ? "bg-primary text-primary-foreground px-4 py-3"
                 : "bg-background w-full"
@@ -124,7 +123,7 @@ export const ChatMessage = memo(function ChatMessage({ message, isStreaming }: C
                 {message.content}
               </div>
             ) : (
-              <div className="space-y-3 break-words">
+              <div className="space-y-3 min-w-0 w-full [overflow-wrap:break-word] [word-break:break-word]">
                 {message.blocks && message.blocks.length > 0 ? (
                   message.blocks.map((block) => {
                     if (block.type === "reasoning") {
@@ -139,7 +138,7 @@ export const ChatMessage = memo(function ChatMessage({ message, isStreaming }: C
                     }
                     if (block.type === "text") {
                       return (
-                        <div key={block.id} className="markdown-content leading-relaxed break-words break-all w-full max-w-full">
+                        <div key={block.id} className="markdown-content leading-relaxed min-w-0 w-full overflow-x-hidden overflow-y-visible [overflow-wrap:break-word] [word-break:break-word]">
                           <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             components={{
