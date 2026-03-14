@@ -47,6 +47,9 @@ const MODELS = [
   { id: "minimax/MiniMax-M2.5", name: "MiniMax-M2.5", provider: "Minimax" },
   { id: "minimax/MiniMax-M2.5-highspeed", name: "MiniMax-M2.5-HighSpeed", provider: "Minimax" },
   { id: "minimax/MiniMax-M2.1-highspeed", name: "MiniMax-M2.1-HighSpeed", provider: "Minimax" },
+  // { id: "openrouter:anthropic/claude-opus-4.6", name: "Claude-Opus-4.6", provider: "OpenRouter" },
+  // { id: "openrouter:openai/gpt-5.4", name: "GPT-5.4", provider: "OpenRouter" },
+  { id: "openrouter:x-ai/grok-4.1-fast", name: "Grok-4.1-Fast", provider: "OpenRouter" },
 ];
 
 
