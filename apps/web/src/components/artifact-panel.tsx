@@ -254,18 +254,16 @@ export function ArtifactPanel() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+      <div className="px-3 py-2.5 border-b border-border/50 flex items-center justify-between shrink-0 bg-card/50">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0">
             <Sparkles className="w-4 h-4 text-primary" />
           </div>
-          <div>
-            <h2 className="text-sm font-semibold text-foreground">Artifacts</h2>
-            <p className="text-xs text-muted-foreground">
-              {artifactList.length > 0 ? `${artifactList.length} 个` : '暂无内容'}
-            </p>
-          </div>
+          <h2 className="text-sm font-semibold text-foreground">Artifacts</h2>
         </div>
+        {artifactList.length > 0 && (
+          <span className="text-xs text-muted-foreground">{artifactList.length}</span>
+        )}
       </div>
       
       {/* Content */}

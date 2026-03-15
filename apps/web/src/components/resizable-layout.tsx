@@ -160,15 +160,6 @@ export function ResizableLayout({
 
   return (
     <main className="h-screen flex flex-col bg-background overflow-hidden" ref={containerRef}>
-      {/* Global Header - 拉通全宽 */}
-      <ChatPanel 
-        isSidebarCollapsed={isSidebarCollapsed}
-        isArtifactCollapsed={isArtifactCollapsed}
-        onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        onToggleArtifact={() => setIsArtifactCollapsed(!isArtifactCollapsed)}
-        headerOnly
-      />
-
       {/* Main Content Area */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
         {/* Sidebar */}
@@ -192,23 +183,37 @@ export function ResizableLayout({
           </div>
         )}
 
-        {/* Chat Area Container - 占满剩余空间并居中聊天内容 */}
-        <div className="flex-1 flex justify-center min-w-0 overflow-hidden">
-          <section 
-            className="flex flex-col overflow-hidden w-full"
-            style={{ 
-              minWidth: minChatWidth,
-              maxWidth: maxChatWidth,
-            }}
-          >
+        {/* Chat Area Container - 占满剩余空间 */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          {/* Header - 占满整个聊天区域宽度 */}
+          <div className="w-full">
             <ChatPanel 
               isSidebarCollapsed={isSidebarCollapsed}
               isArtifactCollapsed={isArtifactCollapsed}
               onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
               onToggleArtifact={() => setIsArtifactCollapsed(!isArtifactCollapsed)}
-              contentOnly
+              headerOnly
             />
-          </section>
+          </div>
+          
+          {/* 聊天内容区域 - 受 maxWidth 限制，居中显示 */}
+          <div className="flex-1 flex justify-center min-w-0 overflow-hidden">
+            <section 
+              className="flex flex-col overflow-hidden w-full"
+              style={{ 
+                minWidth: minChatWidth,
+                maxWidth: maxChatWidth,
+              }}
+            >
+              <ChatPanel 
+                isSidebarCollapsed={isSidebarCollapsed}
+                isArtifactCollapsed={isArtifactCollapsed}
+                onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                onToggleArtifact={() => setIsArtifactCollapsed(!isArtifactCollapsed)}
+                contentOnly
+              />
+            </section>
+          </div>
         </div>
 
         {/* Artifact Panel Drag Handle - 只在展开时显示 */}
