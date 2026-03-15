@@ -4,6 +4,7 @@ import * as React from "react";
 import { ConversationsSidebar } from "@/components/conversations-sidebar";
 import { ChatPanel } from "@/components/chat-panel";
 import { ArtifactPanel } from "@/components/artifact-panel";
+import { SettingsDialog } from "@/components/settings-dialog";
 import { cn } from "@/lib/utils";
 
 // 布局状态缓存 key
@@ -66,6 +67,15 @@ export function ResizableLayout({
   const containerRef = React.useRef<HTMLDivElement>(null);
   const isDraggingSidebar = React.useRef(false);
   const isDraggingArtifact = React.useRef(false);
+  
+  // 设置对话框状态
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const [settingsTab, setSettingsTab] = React.useState("webhooks");
+
+  const handleOpenSettings = (tab: string) => {
+    setSettingsTab(tab);
+    setSettingsOpen(true);
+  };
 
   // 首次加载时从缓存恢复状态
   React.useEffect(() => {
@@ -134,15 +144,14 @@ export function ResizableLayout({
   return (
     <main className="h-screen flex bg-background overflow-hidden" ref={containerRef}>
       {/* Sidebar */}
-      <aside 
-        className={cn(
-          "shrink-0 bg-card bg-zinc-50 border-r border-border/50 flex flex-col transition-all duration-300 ease-out",
-          isSidebarCollapsed ? "w-0 overflow-hidden" : ""
-        )}
-        style={{ width: isSidebarCollapsed ? 0 : sidebarWidth }}
-      >
-        <ConversationsSidebar />
-      </aside>
+      {!isSidebarCollapsed && (
+        <aside 
+          className="shrink-0 bg-card bg-zinc-50 border-r border-border/50 flex flex-col transition-all duration-300 ease-out"
+          style={{ width: sidebarWidth }}
+        >
+          <ConversationsSidebar onOpenSettings={handleOpenSettings} />
+        </aside>
+      )}
 
       {/* Sidebar Drag Handle */}
       {!isSidebarCollapsed && (
@@ -155,21 +164,23 @@ export function ResizableLayout({
         </div>
       )}
 
-      {/* Chat Area - 带最小和最大宽度限制 */}
-      <section 
-        className="flex-1 flex flex-col overflow-hidden"
-        style={{ 
-          minWidth: minChatWidth,
-          maxWidth: isArtifactCollapsed && isSidebarCollapsed ? '100%' : maxChatWidth 
-        }}
-      >
-        <ChatPanel 
-          isSidebarCollapsed={isSidebarCollapsed}
-          isArtifactCollapsed={isArtifactCollapsed}
-          onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          onToggleArtifact={() => setIsArtifactCollapsed(!isArtifactCollapsed)}
-        />
-      </section>
+      {/* Chat Area Container - 占满剩余空间并居中聊天区域 */}
+      <div className="flex-1 flex justify-center min-w-0 overflow-hidden">
+        <section 
+          className="flex flex-col overflow-hidden w-full"
+          style={{ 
+            minWidth: minChatWidth,
+            maxWidth: maxChatWidth,
+          }}
+        >
+          <ChatPanel 
+            isSidebarCollapsed={isSidebarCollapsed}
+            isArtifactCollapsed={isArtifactCollapsed}
+            onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            onToggleArtifact={() => setIsArtifactCollapsed(!isArtifactCollapsed)}
+          />
+        </section>
+      </div>
 
       {/* Artifact Panel Drag Handle - 只在展开时显示 */}
       {!isArtifactCollapsed && (
@@ -191,6 +202,13 @@ export function ResizableLayout({
           <ArtifactPanel />
         </aside>
       )}
+
+      {/* Settings Dialog */}
+      <SettingsDialog 
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        initialTab={settingsTab}
+      />
     </main>
   );
 }
