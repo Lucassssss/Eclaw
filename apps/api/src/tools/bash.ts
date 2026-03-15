@@ -3,10 +3,17 @@ import { z } from "zod";
 import { Bash } from "just-bash";
 import { ReadWriteFs } from "just-bash";
 import path from 'node:path';
+import fs from 'node:fs';
+import { tmpdir } from 'node:os';
 
-const PROJECT_ROOT = path.resolve(import.meta.dir, '../../../../');
+const friendGDir = path.join(tmpdir(), 'friend-g');
+if (!fs.existsSync(friendGDir)) {
+  fs.mkdirSync(friendGDir, { recursive: true });
+}
 
-const rwfs = new ReadWriteFs({ root: path.join(PROJECT_ROOT, 'friend-g') });
+console.log('friendGDir:', friendGDir);
+
+const rwfs = new ReadWriteFs({ root: friendGDir });
 const sandbox = new Bash({
   fs: rwfs,
   network: {
