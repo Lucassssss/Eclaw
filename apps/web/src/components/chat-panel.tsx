@@ -3,11 +3,11 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatMessage, type Message, type MessageBlock, type MessageBlockType } from "./chat-message";
-import { 
-  Bot, 
-  Sparkles, 
-  Send, 
-  Loader2, 
+import {
+  Bot,
+  Sparkles,
+  Send,
+  Loader2,
   ChevronDown,
   Paperclip,
   Zap,
@@ -57,17 +57,17 @@ const MODELS = [
 
 
 const AGENT_TYPES: { id: ChatMode; name: string; icon: React.ReactNode; description: string }[] = [
-  { 
-    id: "agent", 
-    name: "智能代理", 
+  {
+    id: "agent",
+    name: "智能代理",
     icon: <Bot className="w-4 h-4" />,
-    description: "单代理自动决策" 
+    description: "单代理自动决策"
   },
-  { 
-    id: "auto", 
-    name: "自动模式", 
+  {
+    id: "auto",
+    name: "自动模式",
     icon: <Globe className="w-4 h-4" />,
-    description: "自动选择最佳方案" 
+    description: "自动选择最佳方案"
   },
 ];
 
@@ -79,12 +79,12 @@ export function ChatPanel({
   headerOnly = false,
   contentOnly = false,
 }: ChatPanelProps) {
-  const { 
-    messages: storeMessages, 
+  const {
+    messages: storeMessages,
     currentConversation,
     loading: storeLoading,
   } = useConversationStore();
-  
+
   const [messages, setMessages] = useState<StreamingMessage[]>([]);
   const [input, setInput] = useState("");
   const [inputHeight, setInputHeight] = useState(52);
@@ -100,7 +100,7 @@ export function ChatPanel({
 
   useEffect(() => {
     if (storeLoading) return;
-    
+
     if (storeMessages && storeMessages.length > 0) {
       setMessages(storeMessages.map(m => ({
         ...m,
@@ -130,7 +130,7 @@ export function ChatPanel({
     requestAnimationFrame(() => {
       const textarea = textareaRef.current;
       if (!textarea) return;
-      
+
       textarea.style.height = 'auto';
       const newHeight = Math.min(Math.max(textarea.scrollHeight, 52), 320);
       textarea.style.height = `${newHeight}px`;
@@ -154,7 +154,7 @@ export function ChatPanel({
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
-    
+
     const userMessage: StreamingMessage = {
       id: `temp-${Date.now()}`,
       role: "user",
@@ -162,7 +162,7 @@ export function ChatPanel({
       isComplete: true,
       timestamp: Date.now(),
     };
-    
+
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     if (textareaRef.current) {
@@ -170,7 +170,7 @@ export function ChatPanel({
       setInputHeight(52);
     }
     setIsLoading(true);
-    
+
     try {
       const response = await fetch(`${API_BASE}/api/chat`, {
         method: "POST",
@@ -196,7 +196,7 @@ export function ChatPanel({
         timestamp: Date.now(),
         blocks: [],
       };
-      
+
       setMessages(prev => [...prev, assistantMessage]);
 
       const decoder = new TextDecoder();
@@ -210,16 +210,16 @@ export function ChatPanel({
 
       const collapsePreviousBlock = (blocks: MessageBlock[]): MessageBlock[] => {
         if (blocks.length === 0) return blocks;
-        return blocks.map((b, i) => 
+        return blocks.map((b, i) =>
           i < blocks.length - 1 ? { ...b, isCollapsed: true } : { ...b, isCollapsed: false }
         );
       };
 
       while (true) {
         const { value, done: doneReading } = await reader.read();
-        
+
         if (doneReading) break;
-        
+
         if (value) {
           const chunk = decoder.decode(value);
           const lines = chunk.split("\n");
@@ -466,8 +466,8 @@ export function ChatPanel({
             onClick={onToggleSidebar}
             className={cn(
               "flex items-center justify-center w-8 h-8 rounded-lg transition-colors",
-              isSidebarCollapsed 
-                ? "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground" 
+              isSidebarCollapsed
+                ? "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground"
                 : "hover:bg-muted text-muted-foreground hover:text-foreground"
             )}
             aria-label={isSidebarCollapsed ? "展开历史记录" : "收起历史记录"}
@@ -498,8 +498,8 @@ export function ChatPanel({
             onClick={onToggleArtifact}
             className={cn(
               "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm",
-              isArtifactCollapsed 
-                ? "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground" 
+              isArtifactCollapsed
+                ? "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground"
                 : "hover:bg-muted text-muted-foreground hover:text-foreground"
             )}
             aria-label={isArtifactCollapsed ? "展开 Artifact" : "收起 Artifact"}
@@ -522,245 +522,246 @@ export function ChatPanel({
     return (
       <div className="h-full flex flex-col bg-background" onClick={handleClickOutside}>
         {/* 聊天内容区域 - 独立滚动，支持容器查询 */}
-      <div className="chat-container flex-1 min-h-0 min-w-0 overflow-hidden">
-        <ScrollArea className="h-full w-full" ref={scrollRef}>
-          <div className="px-3 sm:px-6 py-6 sm:py-8 w-full max-w-full min-w-0">
-            {showDeepAgentUI ? (
-              <>
-                {(messages.length === 0 && !storeLoading) ? (
-                  <div className="flex flex-col items-center justify-center min-h-[60vh] text-center animate-fade-in">
-                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-6">
-                      <SparklesIcon className="w-10 h-10 text-primary" />
+        <div className="chat-container flex-1 min-h-0 min-w-0 overflow-hidden">
+          <ScrollArea className="h-full w-full" ref={scrollRef}>
+            <div className="px-3 sm:px-6 py-6 sm:py-8 w-full max-w-full min-w-0">
+              {showDeepAgentUI ? (
+                <>
+                  {(messages.length === 0 && !storeLoading) ? (
+                    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center animate-fade-in">
+                      <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-6">
+                        <SparklesIcon className="w-10 h-10 text-primary" />
+                      </div>
+                      <h2 className="text-xl font-semibold text-foreground mb-3">Hi，我是G</h2>
+                      <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
+                        我是一个全能AI助手，今天想做点什么呢?
+                      </p>
                     </div>
-                    <h2 className="text-xl font-semibold text-foreground mb-3">Hi，我是G</h2>
-                    <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
-                      我是一个全能AI助手，今天想做点什么呢?
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-6 min-w-0 w-full">
-                    {messages.map((message, index) => (
-                      <div 
-                        key={message.id} 
-                        className="animate-slide-up min-w-0 w-full"
-                        style={{ animationDelay: `${index * 50}ms` }}
-                      >
-                        <ChatMessage 
-                          message={message}
-                          isStreaming={!message.isComplete && message.role === "assistant"}
-                        />
-                      </div>
-                    ))}
-                    {isLoading && (
-                      <div className="flex items-center gap-3 px-4 py-3 animate-fade-in">
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <Loader2 className="w-4 h-4 text-primary animate-spin" />
-                        </div>
-                        <p className="text-sm text-muted-foreground">AI 正在思考...</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                {(messages.length === 0 && !storeLoading) ? (
-                  <div className="flex flex-col items-center justify-center min-h-[60vh] text-center animate-fade-in">
-                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-6">
-                      <Bot className="w-10 h-10 text-primary" />
-                    </div>
-                    <h2 className="text-xl font-semibold text-foreground mb-3">你好，我是 Aratifact</h2>
-                    <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
-                      有什么我可以帮助你的吗？
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-6 min-w-0 w-full">
-                    {messages.map((message, index) => (
-                      <div 
-                        key={message.id} 
-                        className="animate-slide-up min-w-0 w-full"
-                        style={{ animationDelay: `${index * 50}ms` }}
-                      >
-                        <ChatMessage 
-                          message={message}
-                          isStreaming={!message.isComplete && message.role === "assistant"}
-                        />
-                      </div>
-                    ))}
-                    {isLoading && (
-                      <div className="flex items-center gap-3 px-4 py-3 animate-fade-in">
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <Loader2 className="w-4 h-4 text-primary animate-spin" />
-                        </div>
-                        <p className="text-sm text-muted-foreground">AI 正在思考...</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </ScrollArea>
-      </div>
-      
-      {/* 输入框区域 - 固定底部 */}
-      <div className="p-4 shrink-0 min-w-0">
-        <div className="max-w-4xl mx-auto min-w-0 w-full">
-          <div 
-            className="bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200 focus-within:shadow-md focus-within:border-primary/30"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* 输入区域 - 在上面 */}
-            <div className="relative flex items-center" style={{ minHeight: inputHeight }}>
-              <textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={showDeepAgentUI ? "请输入你想去的旅行目的地..." : "输入你的问题..."}
-                disabled={isLoading}
-                rows={1}
-                className="w-full px-4 py-3 pr-14 resize-none bg-transparent border-none outline-none text-base leading-relaxed"
-                style={{ 
-                  minHeight: '52px',
-                  maxHeight: '320px',
-                  height: 'auto'
-                }}
-              />
-              <button
-                onClick={handleSend}
-                disabled={!input.trim() || isLoading}
-                className={cn(
-                  "absolute right-4 bottom-2 p-1 rounded-full transition-all duration-200",
-                  input.trim() && !isLoading
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
-                    : "bg-muted text-muted-foreground cursor-not-allowed"
-                )}
-              >
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <ArrowUp className="w-4 h-4" />
-                )}
-              </button>
-            </div>
-
-            {/* 分隔线 */}
-            <div className="h-px " />
-
-            {/* 工具栏 - 在下面 */}
-            <div className="flex items-center gap-2 px-3 py-1.5">
-              {/* 附件上传 */}
-              <button
-                className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-                title="上传附件"
-              >
-                <Paperclip className="w-4 h-4" />
-              </button>
-              <div className="w-px h-4 bg-border/50" />
-              {/* 模型选择 */}
-              <div className="relative" onClick={(e) => e.stopPropagation()}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowModelSelector(!showModelSelector);
-                    setShowAgentSelector(false);
-                  }}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-muted transition-colors text-sm"
-                >
-                  <span className="text-muted-foreground">{currentModel?.provider}</span>
-                  <span className="font-medium">{currentModel?.name}</span>
-                  <ChevronDown className="w-3 h-3 text-muted-foreground" />
-                </button>
-                
-                {showModelSelector && (
-                  <div className="absolute bottom-full left-0 mb-2 bg-card border border-border/50 rounded-xl shadow-xl overflow-hidden z-[100]">
-                    <div className="p-2">
-                      <p className="text-sm font-medium text-muted-foreground px-2 py-1">选择模型</p>
-                      {MODELS.map((m) => (
-                        <button
-                          key={m.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setModel(m.id); 
-                            setShowModelSelector(false);
-                          }}
-                          className={cn(
-                            "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-colors",
-                            model === m.id ? "bg-primary/10 text-primary" : "hover:bg-muted"
-                          )}
+                  ) : (
+                    <div className="space-y-6 min-w-0 w-full">
+                      {messages.map((message, index) => (
+                        <div
+                          key={message.id}
+                          className="animate-slide-up min-w-0 w-full"
+                          style={{ animationDelay: `${index * 50}ms` }}
                         >
-                          <span className="text-sm text-muted-foreground">{m.provider}</span>
-                          <span className="flex-1 text-sm font-medium text-ellipsis overflow-hidden whitespace-nowrap">{m.name}</span>
-                        </button>
+                          <ChatMessage
+                            message={message}
+                            isStreaming={!message.isComplete && message.role === "assistant"}
+                          />
+                        </div>
                       ))}
+                      {isLoading && (
+                        <div className="flex items-center gap-3 px-4 py-3 animate-fade-in">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                          </div>
+                          <p className="text-sm text-muted-foreground">AI 正在思考...</p>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                )}
+                  )}
+                </>
+              ) : (
+                <>
+                  {(messages.length === 0 && !storeLoading) ? (
+                    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center animate-fade-in">
+                      <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-6">
+                        <Bot className="w-10 h-10 text-primary" />
+                      </div>
+                      <h2 className="text-xl font-semibold text-foreground mb-3">你好，我是 Aratifact</h2>
+                      <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
+                        有什么我可以帮助你的吗？
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6 min-w-0 w-full">
+                      {messages.map((message, index) => (
+                        <div
+                          key={message.id}
+                          className="animate-slide-up min-w-0 w-full"
+                          style={{ animationDelay: `${index * 50}ms` }}
+                        >
+                          <ChatMessage
+                            message={message}
+                            isStreaming={!message.isComplete && message.role === "assistant"}
+                          />
+                        </div>
+                      ))}
+                      {isLoading && (
+                        <div className="flex items-center gap-3 px-4 py-3 animate-fade-in">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                          </div>
+                          <p className="text-sm text-muted-foreground">AI 正在思考...</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </ScrollArea>
+        </div>
+
+        {/* 输入框区域 - 固定底部 */}
+        <div className="p-4 shrink-0 min-w-0">
+          <div className="max-w-4xl mx-auto min-w-0 w-full">
+            <div
+              className="bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200 focus-within:shadow-md focus-within:border-primary/30"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* 输入区域 - 在上面 */}
+              <div className="relative flex items-center" style={{ minHeight: inputHeight }}>
+                <textarea
+                  ref={textareaRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder={showDeepAgentUI ? "请输入你想去的旅行目的地..." : "输入你的问题..."}
+                  disabled={isLoading}
+                  rows={1}
+                  className="w-full px-4 py-3 pr-14 resize-none bg-transparent border-none outline-none text-base leading-relaxed"
+                  style={{
+                    minHeight: '52px',
+                    maxHeight: '320px',
+                    height: 'auto'
+                  }}
+                />
+                <button
+                  onClick={handleSend}
+                  disabled={!input.trim() || isLoading}
+                  className={cn(
+                    "absolute right-4 bottom-2 p-1 rounded-full transition-all duration-200",
+                    input.trim() && !isLoading
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                      : "bg-muted text-muted-foreground cursor-not-allowed"
+                  )}
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <ArrowUp className="w-4 h-4" />
+                  )}
+                </button>
               </div>
 
               {/* 分隔线 */}
-              <div className="w-px h-4 bg-border/50" />
+              <div className="h-px " />
 
-              {/* Agent 类型选择 */}
-              <div className="relative" onClick={(e) => e.stopPropagation()}>
+              {/* 工具栏 - 在下面 */}
+              <div className="flex items-center gap-2 px-3 py-1.5">
+                {/* 附件上传 */}
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowAgentSelector(!showAgentSelector);
-                    setShowModelSelector(false);
-                  }}
-                  className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm",
-                    "hover:bg-muted"
-                  )}
+                  className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                  title="上传附件"
                 >
-                  {currentAgent?.icon}
-                  <span>{currentAgent?.name}</span>
-                  <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                  <Paperclip className="w-4 h-4" />
                 </button>
-                
-                {showAgentSelector && (
-                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-card border border-border/50 rounded-xl shadow-xl overflow-hidden z-[100]">
-                    <div className="p-2">
-                      <p className="text-xs font-medium text-muted-foreground px-2 py-1">选择模式</p>
-                      {AGENT_TYPES.map((agent) => (
-                        <button
-                          key={agent.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setMode(agent.id);
-                            setShowAgentSelector(false);
-                          }}
-                          className={cn(
-                            "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors",
-                            mode === agent.id ? "bg-primary/10 text-primary" : "hover:bg-muted"
-                          )}
-                        >
-                          <div className={cn(
-                            "w-8 h-8 rounded-lg flex items-center justify-center",
-                            mode === agent.id ? "bg-primary/20" : "bg-muted"
-                          )}>
-                            {agent.icon}
-                          </div>
-                          <div className="flex-1">
-                            <div className="font-medium">{agent.name}</div>
-                            <div className="text-xs text-muted-foreground">{agent.description}</div>
-                          </div>
-                        </button>
-                      ))}
+                <div className="w-px h-4 bg-border/50" />
+                {/* 模型选择 */}
+                <div className="relative" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowModelSelector(!showModelSelector);
+                      setShowAgentSelector(false);
+                    }}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-muted transition-colors text-sm"
+                  >
+                    <span className="text-muted-foreground">{currentModel?.provider}</span>
+                    <span className="font-medium">{currentModel?.name}</span>
+                    <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                  </button>
+
+                  {showModelSelector && (
+                    <div className="absolute bottom-full left-0 mb-2 bg-card border border-border/50 rounded-xl shadow-xl overflow-hidden z-[100]">
+                      <div className="p-2">
+                        <p className="text-sm font-medium text-muted-foreground px-2 py-1">选择模型</p>
+                        {MODELS.map((m) => (
+                          <button
+                            key={m.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setModel(m.id);
+                              setShowModelSelector(false);
+                            }}
+                            className={cn(
+                              "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-colors",
+                              model === m.id ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                            )}
+                          >
+                            <span className="text-sm text-muted-foreground">{m.provider}</span>
+                            <span className="flex-1 text-sm font-medium text-ellipsis overflow-hidden whitespace-nowrap">{m.name}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
+
+                {/* 分隔线 */}
+                <div className="w-px h-4 bg-border/50" />
+
+                {/* Agent 类型选择 */}
+                <div className="relative" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowAgentSelector(!showAgentSelector);
+                      setShowModelSelector(false);
+                    }}
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm",
+                      "hover:bg-muted"
+                    )}
+                  >
+                    {currentAgent?.icon}
+                    <span>{currentAgent?.name}</span>
+                    <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                  </button>
+
+                  {showAgentSelector && (
+                    <div className="absolute bottom-full left-0 mb-2 w-64 bg-card border border-border/50 rounded-xl shadow-xl overflow-hidden z-[100]">
+                      <div className="p-2">
+                        <p className="text-xs font-medium text-muted-foreground px-2 py-1">选择模式</p>
+                        {AGENT_TYPES.map((agent) => (
+                          <button
+                            key={agent.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setMode(agent.id);
+                              setShowAgentSelector(false);
+                            }}
+                            className={cn(
+                              "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors",
+                              mode === agent.id ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                            )}
+                          >
+                            <div className={cn(
+                              "w-8 h-8 rounded-lg flex items-center justify-center",
+                              mode === agent.id ? "bg-primary/20" : "bg-muted"
+                            )}>
+                              {agent.icon}
+                            </div>
+                            <div className="flex-1">
+                              <div className="font-medium">{agent.name}</div>
+                              <div className="text-xs text-muted-foreground">{agent.description}</div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1" />
+
               </div>
-
-              <div className="flex-1" />
-
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 }

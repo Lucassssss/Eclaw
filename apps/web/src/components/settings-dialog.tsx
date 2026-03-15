@@ -246,9 +246,9 @@ export function SettingsDialog({ isOpen, onClose, initialTab = "webhooks" }: Set
   if (!isOpen) return null;
 
   const tabs = [
-    { id: "webhooks", label: "外部链接", icon: <Link2 className="w-4 h-4" /> },
+    { id: "webhooks", label: "IM 配置", icon: <Link2 className="w-4 h-4" /> },
     { id: "system", label: "系统设置", icon: <Mail className="w-4 h-4" /> },
-    { id: "agents", label: "Agent 配置", icon: <Bot className="w-4 h-4" /> },
+    { id: "agents", label: "AI 员工", icon: <Bot className="w-4 h-4" /> },
   ];
 
   return (

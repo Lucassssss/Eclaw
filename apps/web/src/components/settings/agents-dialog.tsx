@@ -294,7 +294,7 @@ export function AgentsDialog({ isOpen, onClose, onRunAgent }: AgentsDialogProps)
               <Bot className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-foreground">Agent 配置</h2>
+              <h2 className="text-base font-semibold text-foreground">AI 员工</h2>
               <p className="text-xs text-muted-foreground">创建和管理智能代理</p>
             </div>
           </div>

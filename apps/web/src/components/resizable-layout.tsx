@@ -8,6 +8,7 @@ import { WebhooksDialog } from "@/components/settings/webhooks-dialog";
 import { SystemDialog } from "@/components/settings/system-dialog";
 import { AgentsDialog } from "@/components/settings/agents-dialog";
 import { cn } from "@/lib/utils";
+import { SettingsDialog } from "./settings-dialog";
 
 // 布局状态缓存 key
 const LAYOUT_STORAGE_KEY = "resizable-layout-state";
@@ -74,19 +75,23 @@ export function ResizableLayout({
   const [webhooksOpen, setWebhooksOpen] = React.useState(false);
   const [systemOpen, setSystemOpen] = React.useState(false);
   const [agentsOpen, setAgentsOpen] = React.useState(false);
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const [settingsTab, setSettingsTab] = React.useState("webhooks");
 
   const handleOpenSettings = (tab: string) => {
-    switch (tab) {
-      case "webhooks":
-        setWebhooksOpen(true);
-        break;
-      case "system":
-        setSystemOpen(true);
-        break;
-      case "agents":
-        setAgentsOpen(true);
-        break;
-    }
+    // switch (tab) {
+    //   case "webhooks":
+    //     setWebhooksOpen(true);
+    //     break;
+    //   case "system":
+    //     setSystemOpen(true);
+    //     break;
+    //   case "agents":
+    //     setAgentsOpen(true);
+    //     break;
+    // }
+    setSettingsTab(tab);
+    setSettingsOpen(true);
   };
 
   // 首次加载时从缓存恢复状态

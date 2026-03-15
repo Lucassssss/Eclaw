@@ -149,7 +149,7 @@ export function ConversationsSidebar({ onOpenSettings }: ConversationsSidebarPro
           className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-muted/60 transition-colors group text-left"
         >
           <Bot className="w-4 h-4 text-muted-foreground/70 group-hover:text-foreground" />
-          <span className="flex-1 text-sm text-foreground/80 group-hover:text-foreground">Agent 配置</span>
+          <span className="flex-1 text-sm text-foreground/80 group-hover:text-foreground">AI 员工</span>
           <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40" />
         </button>
         <button
@@ -157,7 +157,7 @@ export function ConversationsSidebar({ onOpenSettings }: ConversationsSidebarPro
           className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-muted/60 transition-colors group text-left"
         >
           <Link2 className="w-4 h-4 text-muted-foreground/70 group-hover:text-foreground" />
-          <span className="flex-1 text-sm text-foreground/80 group-hover:text-foreground">外部链接</span>
+          <span className="flex-1 text-sm text-foreground/80 group-hover:text-foreground">IM 配置</span>
           <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40" />
         </button>
         <button
