@@ -4,6 +4,7 @@ import type { ToolDefinition } from "../types/index.js";
 import { stagehandTool, navigateTool, extractTool, observeTool } from "./stagehand.js";
 import { bash } from "./bash.js";
 import { artifactTools } from "./artifact.js";
+import { sendEmailTool, checkEmailConfigTool } from "./mail.js";
 
 const calculatorTool = tool({
   description: "计算数学表达式的值",
@@ -49,6 +50,8 @@ export const tools: ToolSet = {
   observeTool,
   bash: bash as any,
   ...artifactTools,
+  sendEmailTool,
+  checkEmailConfigTool,
 };
 
 // export function getToolDefinitions(): ToolDefinition[] {

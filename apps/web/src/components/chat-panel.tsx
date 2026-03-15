@@ -29,6 +29,8 @@ interface ChatPanelProps {
   isArtifactCollapsed?: boolean;
   onToggleSidebar?: () => void;
   onToggleArtifact?: () => void;
+  headerOnly?: boolean;
+  contentOnly?: boolean;
 }
 
 const API_BASE = "http://localhost:3001";
@@ -47,6 +49,9 @@ const MODELS = [
   { id: "minimax/MiniMax-M2.5", name: "MiniMax-M2.5", provider: "Minimax" },
   { id: "minimax/MiniMax-M2.5-highspeed", name: "MiniMax-M2.5-HighSpeed", provider: "Minimax" },
   { id: "minimax/MiniMax-M2.1-highspeed", name: "MiniMax-M2.1-HighSpeed", provider: "Minimax" },
+  // { id: "openrouter:anthropic/claude-opus-4.6", name: "Claude-Opus-4.6", provider: "OpenRouter" },
+  // { id: "openrouter:openai/gpt-5.4", name: "GPT-5.4", provider: "OpenRouter" },
+  { id: "openrouter:x-ai/grok-4.1-fast", name: "Grok-4.1-Fast", provider: "OpenRouter" },
 ];
 
 
@@ -71,6 +76,8 @@ export function ChatPanel({
   isArtifactCollapsed = false,
   onToggleSidebar,
   onToggleArtifact,
+  headerOnly = false,
+  contentOnly = false,
 }: ChatPanelProps) {
   const { 
     messages: storeMessages, 
@@ -449,13 +456,12 @@ export function ChatPanel({
     setShowAgentSelector(false);
   };
 
-  return (
-    <div className="h-full flex flex-col bg-background" onClick={handleClickOutside}>
-      {/* Header - 面包屑样式布局 */}
+  // 只渲染 Header
+  if (headerOnly) {
+    return (
       <header className="px-3 py-2.5 border-b border-border/50 flex items-center justify-between shrink-0 bg-card/50">
         {/* 左侧：侧边栏按钮 + 对话标题 */}
         <div className="flex items-center gap-2 min-w-0">
-          {/* 侧边栏切换按钮 */}
           <button
             onClick={onToggleSidebar}
             className={cn(
@@ -474,19 +480,15 @@ export function ChatPanel({
             )}
           </button>
 
-          {/* 分隔符 */}
           <div className="w-px h-5 bg-border/50" />
 
-          {/* 对话图标和标题 */}
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
               <MessageSquare className="w-3.5 h-3.5 text-primary" />
             </div>
-            <div className="min-w-0 flex-1">
-              <h1 className="text-sm font-medium text-foreground truncate">
-                {currentConversation?.title || "新对话"}
-              </h1>
-            </div>
+            <h1 className="text-sm font-medium text-foreground truncate">
+              {currentConversation?.title || "新对话"}
+            </h1>
           </div>
         </div>
 
@@ -512,8 +514,14 @@ export function ChatPanel({
           </button>
         </div>
       </header>
+    );
+  }
 
-      {/* 聊天内容区域 - 独立滚动，支持容器查询 */}
+  // 只渲染内容区域（无Header）
+  if (contentOnly) {
+    return (
+      <div className="h-full flex flex-col bg-background" onClick={handleClickOutside}>
+        {/* 聊天内容区域 - 独立滚动，支持容器查询 */}
       <div className="chat-container flex-1 min-h-0 min-w-0 overflow-hidden">
         <ScrollArea className="h-full w-full" ref={scrollRef}>
           <div className="px-3 sm:px-6 py-6 sm:py-8 w-full max-w-full min-w-0">
