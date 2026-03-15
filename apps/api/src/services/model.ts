@@ -1,5 +1,6 @@
 import { deepseek } from '@ai-sdk/deepseek';
 import { createMinimax } from 'vercel-minimax-ai-provider';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import "dotenv/config";
 
 // 模块级缓存：存储原生模型实例
@@ -29,6 +30,12 @@ export default class Model {
           baseURL: process.env.MINIMAX_API_BASE_URL,
         });
         instance = minimax(modelId);
+        break;
+      case 'openrouter:x-ai':
+        instance = createOpenRouter({
+          apiKey: process.env.OPENROUTER_API_KEY,
+          baseURL: process.env.OPENROUTER_API_BASE_URL,
+        })(`x-ai/${modelId}`);
         break;
       default:
         throw new Error(`Unsupported provider: ${provider}`);

@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { ToolDefinition } from "../types/index.js";
 import { stagehandTool, navigateTool, extractTool, observeTool } from "./stagehand.js";
 import { bash } from "./bash.js";
+import { sendEmailTool, checkEmailConfigTool } from "./mail.js";
 
 const calculatorTool = tool({
   description: "计算数学表达式的值",
@@ -47,6 +48,8 @@ export const tools: ToolSet = {
   extractTool,
   observeTool,
   bash: bash as any,
+  sendEmailTool,
+  checkEmailConfigTool,
 };
 
 // export function getToolDefinitions(): ToolDefinition[] {

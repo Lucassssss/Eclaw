@@ -57,8 +57,8 @@ export function ResizableLayout({
   defaultArtifactWidth = 800,
   minSidebarWidth = 200,
   minArtifactWidth = 420,
-  minChatWidth = 400,
-  maxChatWidth = 900,
+  minChatWidth = 420,
+  maxChatWidth = 800,
 }: ResizableLayoutProps) {
   // 初始化时尝试从缓存加载
   const [isInitialized, setIsInitialized] = React.useState(false);
