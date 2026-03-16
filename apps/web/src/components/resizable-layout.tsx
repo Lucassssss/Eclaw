@@ -160,7 +160,7 @@ export function ResizableLayout({
         {/* Sidebar */}
         {!isSidebarCollapsed && (
           <aside 
-            className="shrink-0 bg-card bg-zinc-50 border-r border-border/50 flex flex-col"
+            className="shrink-0 bg-card bg-zinc-50 flex flex-col"
             style={{ width: sidebarWidth }}
           >
             <ConversationsSidebar onOpenSettings={handleOpenSettings} />
@@ -179,7 +179,8 @@ export function ResizableLayout({
         )}
 
         {/* Chat Area Container - 占满剩余空间 */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <div className="p-3 pl-0 pr-1.5 flex-1 flex flex-col min-w-0 overflow-hidden bg-gradient-primary-light">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white rounded-lg shadow-sm">
           {/* Header - 占满整个聊天区域宽度 */}
           <div className="w-full">
             <ChatPanel 
@@ -210,6 +211,7 @@ export function ResizableLayout({
             </section>
           </div>
         </div>
+        </div>
 
         {/* Artifact Panel Drag Handle - 只在展开时显示 */}
         {!isArtifactCollapsed && (
@@ -225,10 +227,12 @@ export function ResizableLayout({
         {/* Artifact Panel - 完全隐藏时不渲染 */}
         {!isArtifactCollapsed && (
           <aside 
-            className="shrink-0 bg-card bg-zinc-50 border-l border-border/50 flex flex-col"
+            className="shrink-0 bg-card bg-zinc-50 flex flex-col bg-gradient-primary-light p-3 pl-1"
             style={{ width: artifactWidth }}
           >
-            <ArtifactPanel />
+            <div className="bg-white h-full rounded-lg shadow-sm overflow-hidden">
+              <ArtifactPanel />
+            </div>
           </aside>
         )}
       </div>

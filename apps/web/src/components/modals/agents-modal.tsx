@@ -144,8 +144,8 @@ export function AgentsModal({ isOpen, onClose }: AgentsModalProps) {
       <div className="relative bg-card rounded-xl shadow-2xl w-full max-w-5xl max-h-[85vh] min-h-[550px] flex flex-col overflow-hidden border border-border/50">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Bot className="w-5 h-5 text-primary" />
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#4e83fd] to-[#3370ff] flex items-center justify-center">
+              <Bot className="w-5 h-5 text-white" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-foreground">Agent 配置</h2>

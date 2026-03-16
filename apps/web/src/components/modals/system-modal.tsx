@@ -44,12 +44,12 @@ export function SystemModal({ isOpen, onClose }: SystemModalProps) {
       <div className="relative bg-card rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] min-h-[500px] flex flex-col overflow-hidden border border-border/50">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Settings className="w-5 h-5 text-primary" />
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#4e83fd] to-[#3370ff] flex items-center justify-center">
+              <Settings className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-foreground">系统配置</h2>
-              <p className="text-xs text-muted-foreground">配置系统各项服务和功能</p>
+              <h2 className="text-lg font-semibold text-foreground">设置</h2>
+              <p className="text-xs text-muted-foreground">设置系统各项服务和功能</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-muted rounded-lg transition-colors">

@@ -127,9 +127,9 @@ export function ConversationsSidebar({ onOpenSettings }: ConversationsSidebarPro
   };
 
   return (
-    <div className="h-full flex flex-col bg-card/50">
+    <div className="h-full flex flex-col bg-gradient-primary-light">
       {/* Logo 区域 */}
-      <div className="px-3 py-2.5 border-b border-border/50">
+      <div className="px-3 py-2.5">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
             <Sparkles className="w-4 h-4 text-primary" />

@@ -135,13 +135,13 @@ function ArtifactCard({
       <div 
         className={cn(
           "flex items-center gap-2.5 px-3 py-2.5 cursor-pointer transition-colors",
-          isActive ? "bg-primary/5" : "hover:bg-muted/30"
+          isActive ? "bg-[#1456f0]/5" : "hover:bg-muted/30"
         )}
         onClick={onSelect}
       >
         <div className={cn(
           "w-7 h-7 rounded-md flex items-center justify-center shrink-0",
-          isActive ? "bg-primary/15 text-primary" : "bg-muted/50 text-muted-foreground"
+          isActive ? "bg-[#1456f0]/15 text-[#1456f0]" : "bg-muted/50 text-muted-foreground"
         )}>
           {isStreaming ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -180,7 +180,7 @@ function ArtifactCard({
       {isStreaming && (
         <div className="h-1 bg-muted">
           <div 
-            className="h-full bg-primary transition-all duration-300"
+            className="h-full bg-gradient-to-r from-[#4e83fd] to-[#3370ff] transition-all duration-300"
             style={{ width: `${progress * 100}%` }}
           />
         </div>
@@ -256,8 +256,8 @@ export function ArtifactPanel() {
       {/* Header */}
       <div className="px-3 py-2.5 border-b border-border/50 flex items-center justify-between shrink-0 bg-card/50">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-            <Sparkles className="w-4 h-4 text-primary" />
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#4e83fd] to-[#3370ff] flex items-center justify-center shrink-0">
+            <Sparkles className="w-4 h-4 text-white" />
           </div>
           <h2 className="text-sm font-semibold text-foreground">Artifacts</h2>
         </div>

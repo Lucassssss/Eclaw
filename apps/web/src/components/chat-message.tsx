@@ -113,7 +113,7 @@ export const ChatMessage = memo(function ChatMessage({ message, isStreaming }: C
           <div
             className={`group relative min-w-0 max-w-full ${
               isUser
-                ? "bg-primary text-primary-foreground px-4 py-3"
+                ? "bg-gradient-to-br from-[#4e83fd] to-[#3370ff] text-white px-4 py-3"
                 : "bg-background w-full"
             }`}
             style={{ borderRadius: "4px" }}

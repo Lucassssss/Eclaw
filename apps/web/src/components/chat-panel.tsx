@@ -618,7 +618,7 @@ export function ChatPanel({
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={showDeepAgentUI ? "请输入你想去的旅行目的地..." : "输入你的问题..."}
+                  placeholder="畅所欲问..."
                   disabled={isLoading}
                   rows={1}
                   className="w-full px-4 py-3 pr-14 resize-none bg-transparent border-none outline-none text-base leading-relaxed"
@@ -634,7 +634,7 @@ export function ChatPanel({
                   className={cn(
                     "absolute right-4 bottom-2 p-1 rounded-full transition-all duration-200",
                     input.trim() && !isLoading
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                      ? "bg-gradient-to-br from-[#4e83fd] to-[#3370ff] text-white shadow-sm"
                       : "bg-muted text-muted-foreground cursor-not-allowed"
                   )}
                 >
