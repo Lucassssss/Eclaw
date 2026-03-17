@@ -49,6 +49,13 @@
 - **语言模型**: DeepSeek, OpenAI, MiniMax
 - **多模型支持**: 灵活切换不同 LLM 提供商
 
+### 桌面端
+
+- **框架**: Electron 33
+- **打包工具**: electron-builder
+- **日志系统**: electron-log
+- **构建目标**: Windows / macOS / Linux
+
 ## 🏗️ 产品架构
 
 ### 整体架构
@@ -135,8 +142,8 @@
 
 ```bash
 # 克隆项目
-git clone <your-repo-url>
-cd ai-assistant
+git clone https://github.com/Lucassssss/Eclaw
+cd Eclaw
 
 # 安装依赖
 bun install
@@ -179,34 +186,60 @@ cd apps/api && bun run dev  # API 服务: http://localhost:3001
 cd apps/web && bun run dev  # Web 界面: http://localhost:3000
 ```
 
+### 桌面端开发
+
+```bash
+# 进入桌面端目录
+cd apps/electron
+
+# 安装依赖
+npm install
+
+# 开发模式（同时启动主进程和渲染进程）
+npm run dev
+
+# 构建桌面应用
+npm run dist     # 构建当前平台
+npm run dist:mac # 构建 macOS
+npm run dist:win # 构建 Windows
+npm run dist:linux # 构建 Linux
+```
+
 ## 📁 项目结构
 
 ```
-ai-assistant/
+Eclaw/
 ├── apps/
 │   ├── api/                 # Express API 服务
 │   │   ├── src/
 │   │   │   ├── prompts/     # AI 提示词
-│   │   │   ├── routes/      # API 路由
-│   │   │   ├── services/    # 核心服务
-│   │   │   ├── tools/       # Agent 工具
-│   │   │   └── types/       # 类型定义
+│   │   │   ├── routes/     # API 路由
+│   │   │   ├── services/   # 核心服务
+│   │   │   ├── tools/      # Agent 工具
+│   │   │   └── types/      # 类型定义
 │   │   └── package.json
 │   │
-│   └── web/                 # Next.js Web 应用
+│   ├── web/                 # Next.js Web 应用
+│   │   ├── src/
+│   │   │   ├── app/        # Next.js App Router
+│   │   │   ├── components/ # React 组件
+│   │   │   ├── deepagent/  # 子 Agent 功能
+│   │   │   ├── hooks/      # 自定义 Hooks
+│   │   │   └── lib/        # 工具函数
+│   │   └── package.json
+│   │
+│   └── electron/           # Electron 桌面应用
 │       ├── src/
-│       │   ├── app/         # Next.js App Router
-│       │   ├── components/  # React 组件
-│       │   ├── deepagent/   # 子 Agent 功能
-│       │   ├── hooks/       # 自定义 Hooks
-│       │   └── lib/         # 工具函数
+│       │   ├── main/       # 主进程
+│       │   └── preload/    # 预加载脚本
 │       └── package.json
 │
-├── docs/                    # 项目文档
-│   └── PRD.md              # 产品需求文档
+├── docs/                   # 项目文档
+│   ├── PRD.md             # 产品需求文档
+│   └── images/            # 项目截图
 │
-├── .env.example            # 环境变量模板
-└── package.json            # Monorepo 根配置
+├── .env.example           # 环境变量模板
+└── package.json           # Monorepo 根配置
 ```
 
 ## 🔧 可用工具
@@ -217,6 +250,7 @@ ai-assistant/
 | `browser`  | 浏览器自动化操作  |
 | `artifact` | 创建和管理代码片段 |
 | `mail`     | 发送电子邮件    |
+
 
 ## 📝 环境变量参考
 
