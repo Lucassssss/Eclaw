@@ -1,6 +1,6 @@
 import { deepseek, DeepSeekLanguageModelOptions } from '@ai-sdk/deepseek';
 import { createMinimax } from 'vercel-minimax-ai-provider';
-import { ModelMessage, stepCountIs, streamText, ToolLoopAgent, ToolSet } from 'ai';
+import { ModelMessage, stepCountIs, streamText, ToolLoopAgent, ToolSet } from 'ai6';
 import { tools } from '../tools/index.js';
 import { theStartupFoundersLastStandPrompt } from '../prompts/index.js';
 import "dotenv/config";

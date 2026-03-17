@@ -1,5 +1,5 @@
 {
-  "name": "ai-assistant-monorepo",
+  "name": "eclaw",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -7,9 +7,15 @@
   ],
   "scripts": {
     "dev": "turbo run dev",
+    "dev:desktop": "turbo run dev --filter=electron",
     "build": "turbo run build",
+    "build:desktop": "turbo run build --filter=electron",
     "lint": "turbo run lint",
-    "clean": "turbo run clean && rm -rf node_modules"
+    "clean": "turbo run clean && rm -rf node_modules",
+    "desktop": "cd apps/electron && bun run start",
+    "desktop:dev": "cd apps/electron && bun run dev",
+    "desktop:build": "cd apps/electron && bun run build",
+    "desktop:dist": "cd apps/electron && bun run dist"
   },
   "devDependencies": {
     "@langchain/langgraph-cli": "^1.1.15",

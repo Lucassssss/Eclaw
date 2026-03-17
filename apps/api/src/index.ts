@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import router from "./routes/index.js";
-import { redis } from 'bun'
 import killPort from 'kill-port';
 
 const app = express();
