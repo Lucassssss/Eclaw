@@ -6,7 +6,7 @@ import { theStartupFoundersLastStandPrompt } from '../prompts/index.js';
 import "dotenv/config";
 import Model from './model.js';
 import Agent from './agent.js';
-import { streamDeepAgentUpdates } from './deep-agent.js';
+// import { streamDeepAgentUpdates } from './deep-agent.js';
 
 export interface ArtifactEvent {
   type: 'artifact';
@@ -51,11 +51,12 @@ export const runChat = async (
       tools: tools,
       stopWhen: stepCountIs(100),
     });
-  } else if(mode === "deep-agent") {
-    await streamDeepAgentUpdates({ messages: messages as any }, res);
-    onAssistantMessage?.("", true);
-    return;
-  }
+  } 
+  // else if(mode === "deep-agent") {
+  //   await streamDeepAgentUpdates({ messages: messages as any }, res);
+  //   onAssistantMessage?.("", true);
+  //   return;
+  // }
 
   for await (const part of result.fullStream) {
     switch (part.type) {

@@ -4,9 +4,9 @@ import { Bash } from "just-bash";
 import { ReadWriteFs } from "just-bash";
 import path from 'node:path';
 import fs from 'node:fs';
-import { tmpdir } from 'node:os';
 
-const friendGDir = path.join(tmpdir(), 'friend-g');
+const dataDir = process.env.ECLAW_DATA_DIR || process.cwd();
+const friendGDir = path.join(dataDir, 'friend-g');
 if (!fs.existsSync(friendGDir)) {
   fs.mkdirSync(friendGDir, { recursive: true });
 }

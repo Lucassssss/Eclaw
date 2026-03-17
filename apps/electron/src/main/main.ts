@@ -1,6 +1,5 @@
 import { app, BrowserWindow, shell } from 'electron';
 import * as path from 'path';
-import * as http from 'http';
 import { spawn, ChildProcess } from 'child_process';
 import log from 'electron-log';
 
@@ -11,11 +10,10 @@ log.info('Application starting...');
 
 const isDev = !app.isPackaged;
 const API_PORT = 3001;
-const WEB_PORT = 3000;
 
 let mainWindow: BrowserWindow | null = null;
 let apiProcess: ChildProcess | null = null;
-let webServer: http.Server | null = null;
+let apiRunning = false;
 
 function getResourcePath(relativePath: string): string {
   if (app.isPackaged) {
@@ -27,14 +25,17 @@ function getResourcePath(relativePath: string): string {
 function startApiServer(): Promise<void> {
   return new Promise((resolve) => {
     const apiPath = getResourcePath('api/server');
+    const userDataPath = app.getPath('userData');
     
     log.info('Starting API server from:', apiPath);
+    log.info('User data path:', userDataPath);
     
     apiProcess = spawn(apiPath, [], {
       env: {
         ...process.env,
         PORT: API_PORT.toString(),
         NODE_ENV: 'production',
+        ECLAW_DATA_DIR: userDataPath,
       },
       stdio: 'pipe',
     });
@@ -44,83 +45,36 @@ function startApiServer(): Promise<void> {
     });
 
     apiProcess.stderr?.on('data', (data) => {
-      log.error('[API Error]', data.toString().trim());
+      const msg = data.toString().trim();
+      log.warn('[API]', msg);
+      
+      if (msg.includes('Error:') || msg.includes('error:')) {
+        log.warn('[API] API server encountered an error but continuing...');
+      }
     });
 
     apiProcess.on('spawn', () => {
       log.info('API server started on port', API_PORT);
+      apiRunning = true;
       resolve();
+    });
+
+    apiProcess.on('exit', (code) => {
+      log.warn('API server exited with code:', code);
+      apiRunning = false;
+      
+      if (!isDev && code !== 0) {
+        log.info('Restarting API server in 3 seconds...');
+        setTimeout(() => {
+          if (!apiRunning) {
+            startApiServer();
+          }
+        }, 3000);
+      }
     });
 
     apiProcess.on('error', (err) => {
-      log.error('Failed to start API server:', err);
-      resolve();
-    });
-  });
-}
-
-function startWebServer(): Promise<void> {
-  return new Promise((resolve) => {
-    const webPath = getResourcePath('web');
-    log.info('Starting web server from:', webPath);
-
-    webServer = http.createServer((req, res) => {
-      const url = req.url || '/';
-      let filePath = path.join(webPath, url === '/' ? 'index.html' : url);
-      
-      if (!path.extname(filePath)) {
-        filePath = path.join(filePath, 'index.html');
-      }
-
-      const ext = path.extname(filePath);
-      const contentTypes: Record<string, string> = {
-        '.html': 'text/html',
-        '.js': 'text/javascript',
-        '.css': 'text/css',
-        '.json': 'application/json',
-        '.png': 'image/png',
-        '.jpg': 'image/jpeg',
-        '.svg': 'image/svg+xml',
-        '.woff': 'font/woff',
-        '.woff2': 'font/woff2',
-      };
-      const contentType = contentTypes[ext] || 'application/octet-stream';
-
-      const fs = require('fs');
-      
-      if (req.url?.startsWith('/api/')) {
-        const proxyReq = http.request({
-          hostname: 'localhost',
-          port: API_PORT,
-          path: req.url,
-          method: req.method,
-          headers: req.headers,
-        }, (proxyRes) => {
-          res.writeHead(proxyRes.statusCode || 500, proxyRes.headers);
-          proxyRes.pipe(res, { end: true });
-        });
-
-        req.pipe(proxyReq, { end: true });
-      } else {
-        fs.readFile(filePath, (err: Error | null, data: Buffer) => {
-          if (err) {
-            res.writeHead(404);
-            res.end('Not Found');
-            return;
-          }
-          res.writeHead(200, { 'Content-Type': contentType });
-          res.end(data);
-        });
-      }
-    });
-
-    webServer.listen(WEB_PORT, () => {
-      log.info('Web server started on port', WEB_PORT);
-      resolve();
-    });
-
-    webServer.on('error', (err) => {
-      log.error('Failed to start web server:', err);
+      log.error('Failed to start API server:', err.message);
       resolve();
     });
   });
@@ -150,10 +104,12 @@ function createWindow(): void {
   });
 
   if (isDev) {
-    mainWindow.loadURL(`http://localhost:${WEB_PORT}`);
+    mainWindow.loadURL('http://localhost:3000');
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadURL(`http://localhost:${WEB_PORT}`);
+    const webPath = getResourcePath('web/index.html');
+    log.info('Loading web from:', webPath);
+    mainWindow.loadFile(webPath);
   }
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -171,7 +127,6 @@ app.whenReady().then(async () => {
 
   if (!isDev) {
     await startApiServer();
-    await startWebServer();
   }
 
   createWindow();
@@ -187,10 +142,6 @@ function cleanup() {
   if (apiProcess) {
     apiProcess.kill();
     apiProcess = null;
-  }
-  if (webServer) {
-    webServer.close();
-    webServer = null;
   }
 }
 
@@ -208,7 +159,6 @@ app.on('before-quit', () => {
 
 process.on('uncaughtException', (error) => {
   log.error('Uncaught exception:', error);
-  process.exit(1);
 });
 
 process.on('unhandledRejection', (reason) => {

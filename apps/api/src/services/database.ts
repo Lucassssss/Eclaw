@@ -1,6 +1,11 @@
 import { Database } from "bun:sqlite";
+import * as path from "path";
 
-const db = new Database("conversations.db");
+const dataDir = process.env.ECLAW_DATA_DIR || process.cwd();
+const dbPath = path.join(dataDir, "conversations.db");
+console.log("Database path:", dbPath);
+
+const db = new Database(dbPath);
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS conversations (
