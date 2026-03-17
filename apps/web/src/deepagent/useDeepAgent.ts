@@ -33,7 +33,8 @@ interface UseDeepAgentReturn {
 }
 
 export function useDeepAgent(options: UseDeepAgentOptions = {}): UseDeepAgentReturn {
-  const apiUrl = options.apiUrl || "http://localhost:3001";
+const DEFAULT_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+  const apiUrl = options.apiUrl || DEFAULT_API_URL;
   
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);

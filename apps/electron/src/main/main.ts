@@ -9,7 +9,7 @@ log.transports.console.level = 'debug';
 log.info('Application starting...');
 
 const isDev = !app.isPackaged;
-const API_PORT = 3001;
+const API_PORT = 26318;
 
 let mainWindow: BrowserWindow | null = null;
 let apiProcess: ChildProcess | null = null;

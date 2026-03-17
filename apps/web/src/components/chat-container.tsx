@@ -8,6 +8,8 @@ import { SettingsPanel, SettingsButton } from "./settings-panel";
 import { Bot, Plus, ArrowUp, Sparkles } from "lucide-react";
 import { useConversationStore } from "@/hooks/useConversations";
 import { useArtifactStore, type Artifact } from "./artifact-panel";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 import {
   InputGroup,
   InputGroupAddon,
@@ -129,7 +131,7 @@ export function ChatContainer() {
 
   const handleDeepAgentChat = async (aiMessageId: string, userInput: string) => {
     try {
-      const response = await fetch("http://localhost:3001/api/deep-agent/stream?mode=updates", {
+      const response = await fetch(`${API_BASE}/api/deep-agent/stream?mode=updates`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -240,7 +242,7 @@ export function ChatContainer() {
 
   const handleNormalChat = async (aiMessageId: string, userInput: string) => {
     try {
-      const response = await fetch("http://localhost:3001/api/chat", {
+      const response = await fetch(`${API_BASE}/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
